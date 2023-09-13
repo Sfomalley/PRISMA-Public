@@ -1,0 +1,232 @@
+-------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  D:/Users/stacie.loisate/Documents//PRISMA_Digit_Preference_2023-09-08.lo
+> g
+  log type:  text
+ opened on:  13 Sep 2023, 11:01:37
+
+. 
+. *****************************************************************************
+.  * Measurement: MUAC 
+.  * Form: MNH05 
+.  * varname: MUAC_PERES
+. *****************************************************************************
+. 
+. * load MNH05 
+. import delimited using "$dir/mnh05.csv", clear
+(encoding automatically selected: ISO-8859-2)
+Note: Unmatched quote while processing row 81; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 82; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+(20 vars, 3,448 obs)
+
+. rename *, upper
+
+. 
+. * Measurement: MUAC (MNH05)
+. * Filter and transform the data
+. keep MOMID PREGID MUAC_PERES
+
+. 
+. *melt id(MOMID PREGID) variable(varname) value(measurement)
+. *reshape long MUAC_PERES, i(MOMID PREGID) j(varname)
+. drop if MUAC_PERES == -7 | MUAC_PERES == -5
+(460 observations deleted)
+
+. gen digit = round(MUAC_PERES, 0.1) - floor(round(MUAC_PERES, 0.1))
+(1 missing value generated)
+
+. 
+. * Create a histogram for MUAC Digit Preference
+. histogram digit,discrete width(0.1) frequency ///
+>     title("MUAC Digit Preference") xtitle("Digit") ytitle("Frequency") ///
+>         xlabel(0(0.1)1) xtick(0(0.1)1) ///
+>     mcolor(black) bfcolor(teal) bcolor(black) ///
+>     scheme(s1mono) legend(off)
+(start=0, width=.1)
+
+. 
+. graph export "$out/Muac_digit_preference_$date.png", replace
+(file D:/Users/stacie.loisate/Documents/output/Muac_digit_preference_2023-09-08.png
+    not found)
+file D:/Users/stacie.loisate/Documents/output/Muac_digit_preference_2023-09-08.png
+    saved as PNG format
+
+. 
+. 
+. *****************************************************************************
+.  * Measurement: SpO2 
+.  * Form: MNH06
+.  * varname: PULSEOX_VSORRES
+. *****************************************************************************
+. 
+. * load MNH06
+. import delimited using "$dir/mnh06.csv", clear
+(encoding automatically selected: ISO-8859-1)
+Note: Unmatched quote while processing row 196; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 197; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 235; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 236; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 572; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 573; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 1123; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 1124; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 1898; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 1900; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 2202; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 2203; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 2295; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 2298; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 2639; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+Note: Unmatched quote while processing row 2640; this can be due to a formatting
+    problem in the file or because a quoted data element spans multiple lines. You
+    should carefully inspect your data after importing. Consider using option
+    bindquote(strict) if quoted data spans multiple lines or option
+    bindquote(nobind) if quotes are not used for binding data.
+(75 vars, 3,503 obs)
+
+. rename *, upper
+
+. 
+. preserve 
+
+. * Measurement: SpO2 (MNH06)
+. * Filter and transform the data
+. keep MOMID PREGID PULSEOX_VSORRES
+
+. drop if PULSEOX_VSORRES == -7 | PULSEOX_VSORRES == -5
+(22 observations deleted)
+
+. gen digit = floor(PULSEOX_VSORRES- floor(PULSEOX_VSORRES / 10) * 10)
+(11 missing values generated)
+
+. 
+. * Create a histogram for SpO2 Digit Preference
+. histogram digit,discrete width(1) frequency ///
+>     title("SpO2 Digit Preference") xtitle("Digit") ytitle("Frequency") ///
+>     xtick(0(1)10) xlabel(0(1)10) ///
+>     mcolor(black) bfcolor(teal) bcolor(black) ///
+>     scheme(s1mono) legend(off)
+(start=0, width=1)
+
+. 
+. graph export "$out/SpO2_digit_preference_$date.png", replace
+(file D:/Users/stacie.loisate/Documents/output/SpO2_digit_preference_2023-09-08.png
+    not found)
+file D:/Users/stacie.loisate/Documents/output/SpO2_digit_preference_2023-09-08.png
+    saved as PNG format
+
+. 
+. restore
+
+. 
+. *****************************************************************************
+.  * Measurement: Maternal respiratory rate 
+.  * Form: MNH06
+.  * varname: RR_VSORRES
+. *****************************************************************************
+. * Measurement: Maternal respiratory rate (MNH06)
+. * Filter and transform the data
+. keep MOMID PREGID RR_VSORRES
+
+. drop if RR_VSORRES == -7 | RR_VSORRES == -5
+(23 observations deleted)
+
+. gen digit = floor(RR_VSORRES- floor(RR_VSORRES / 10) * 10)
+(11 missing values generated)
+
+. 
+. * Create a histogram for Maternal respiratory rate Digit Preference
+. histogram digit, discrete width(1) frequency ///
+>     title("Maternal Respiratory Rate Digit Preference") xtitle("Digit") ytitle("Fre
+> quency") ///
+>     xtick(0(1)10) xlabel(0(1)10) ///
+>     mcolor(black) bfcolor(teal) bcolor(black) ///
+>     scheme(s1mono) legend(off)
+(start=0, width=1)
+
+.         
+. graph export "$out/Mat_RR_digit_preference_$date.png", replace
+(file
+    D:/Users/stacie.loisate/Documents/output/Mat_RR_digit_preference_2023-09-08.png
+    not found)
+file
+    D:/Users/stacie.loisate/Documents/output/Mat_RR_digit_preference_2023-09-08.png
+    saved as PNG format
+
+. 
+.         
+. log close
+      name:  <unnamed>
+       log:  D:/Users/stacie.loisate/Documents//PRISMA_Digit_Preference_2023-09-08.lo
+> g
+  log type:  text
+ closed on:  13 Sep 2023, 11:01:41
+-------------------------------------------------------------------------------------
