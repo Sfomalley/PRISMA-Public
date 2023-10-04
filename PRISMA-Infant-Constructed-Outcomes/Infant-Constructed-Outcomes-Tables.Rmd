@@ -1,0 +1,1018 @@
+---
+title: "<span style='font-size: 18px'> <span style='text-align: center'> PRISMA-Infant-Outcomes (Issued: 2023-10-03)"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: 4
+  word_document:
+    toc: yes
+    toc_depth: '4'
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+    df_print: kable
+always_allow_html: true
+header-includes:
+   - \usepackage{booktabs}
+
+knit: (function(inputFile, encoding) { 
+      out_dir <- 'output';
+      rmarkdown::render(inputFile,
+                        encoding=encoding, 
+                        output_file=file.path(dirname(inputFile), out_dir, 'PRISMA-Infant-Outcomes-Report')) })
+---
+
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+
+
+##### **Includes data from synapse last updated:** {.unlisted .unnumbered}
+##### Kenya : 2023-09-29 {.unlisted .unnumbered}
+##### Pakistan : 2023-09-29 {.unlisted .unnumbered}
+##### Ghana : 2023-09-29 {.unlisted .unnumbered}
+##### Zambia : 2023-09-29 {.unlisted .unnumbered}
+
+```{css, echo=FALSE}
+.table caption {
+  color: black;
+  font-weight: bold;
+}
+```
+
+
+```{r, data setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+#*****************************************************************************
+#* PRISMA Infant Outcomes -- TABLES 
+#* Drafted: 21 September 2023, Stacie Loisate
+#* Last updated: 17 April 2023
+#*****************************************************************************
+library(knitr)
+library(tidyverse)
+library(reshape2)
+library(lubridate)
+library(kableExtra)
+library(emo)
+library(naniar)
+library(RColorBrewer)
+
+UploadDate <- "2023-09-29"
+
+path_to_data <- "D:/Users/stacie.loisate/Box/PRISMA-Analysis/Infant-Constructed-Variables/data/"
+path_to_save <- "D:/Users/stacie.loisate/Box/PRISMA-Analysis/Infant-Constructed-Variables/output/"
+
+lowbirthweight <- read.csv(paste0(path_to_data, "lowbirthweight.csv"))
+preterm_birth <- read.csv(paste0(path_to_data, "preterm_birth.csv"))
+sga <- read.csv(paste0(path_to_data, "sga.csv"))
+mortality <- read.csv(paste0(path_to_data, "mortality.csv"))
+infant_mortality  <- read.csv(paste0(path_to_data, "infant_mortality.csv"))
+neonatal_mortality <- read.csv(paste0(path_to_data, "neonatal_mortality.csv"))
+stillbirth <- read.csv(paste0(path_to_data, "stillbirth", ".csv"))
+
+mnh01_constructed <- read.csv(paste0(path_to_data, "mnh01_constructed.csv"))
+
+```
+
+\newpage
+
+### Low Birthweight 
+**Definition:** Defined as liveborn infant weighing less than 2500g at birth (within 72 hours of birth). 
+<br>
+<br>
+
+**Denominator:**
+<br>
+Any infant with a MNH11 form filled out with a reported "live birth" `(INF_DSTERM=1 [MNH11])`.
+<br>
+<br>
+
+**To be included as "non-Missing" for this outcome, a participant must have:**
+<br>
+**1.** Live birth (varname [form]: `INF_DSTERM [MNH11]`).
+<br>
+**2.** Birthweight measured by PRISMA staff <72 hours following birth (varnames [form]: `BW_EST_FAORRES [MNH11]`, `BW_FAORRES [MNH11]`, `BW_FAORRES_REPORT [MNH11]`).
+<br>
+**3.** Facility reported birthweight where PRISMA not available (varnames [form]: `BW_EST_FAORRES [MNH11]`, `BW_FAORRES [MNH11]`, `BW_FAORRES_REPORT [MNH11]`).
+<br>
+<br>
+
+**Common causes for a participant to be marked as "Missing":**
+<br>
+**-** PRISMA-measured birthweight is missing.
+<br>
+**-** PRISMA-measured birthweight was taken >= 72 hours following birth.
+<br>
+**-** Both Facility and PRISMA-measured birthweights are missing.
+<br>
+<br>
+
+#### Table 1. Low birth weight 
+*Values for missing birthweights are also reported in this table. For all variables, 1 indicates "Yes" and 0 indicates "No".*
+```{r lbw}
+
+lowbirthweight_tab <- lowbirthweight %>% 
+  rowwise() %>% 
+  group_by(SITE) %>% 
+  summarise(
+    
+    "Missing Hours Since Birth weight was reported, n (%)" = paste0(
+      format(sum(MISSING_TIME == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(MISSING_TIME == 1, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+
+    "Missing PRISMA, n (%)" = paste0(
+      format(sum(MISSING_PRISMA == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(MISSING_PRISMA == 1, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Missing Facility, n (%)" = paste0(
+      format(sum(MISSING_FACILITY == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(MISSING_FACILITY == 1, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Missing PRISMA & Facility, n (%)" = paste0(
+      format(sum(MISSING_BOTH == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(MISSING_BOTH == 1, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    ## PRISMA MEASURED BIRTH WEIGHT CATEGORICAL VARIABLE 
+    "PRISMA LBW - >=2500, n (%)" = paste0(
+      format(sum(LBW_CAT_PRISMA == 13, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(LBW_CAT_PRISMA == 13, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "PRISMA LBW - <2500, n (%)" = paste0(
+      format(sum(LBW_CAT_PRISMA == 11, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(LBW_CAT_PRISMA == 11, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "PRISMA LBW - <1500, n (%)" = paste0(
+      format(sum(LBW_CAT_PRISMA == 12, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(LBW_CAT_PRISMA == 12, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "PRISMA LBW - missing, n (%)" = paste0(
+      format(sum(LBW_CAT_PRISMA == 55, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(LBW_CAT_PRISMA == 55, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    ## ANY BIRTH WEIGHT CATEGORICAL VARIABLE 
+    "ANY LBW - >=2500, n (%)" = paste0(
+      format(sum(LBW_CAT_ANY == 13, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(LBW_CAT_ANY == 13, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "ANY LBW - <2500, n (%)" = paste0(
+      format(sum(LBW_CAT_ANY == 11, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(LBW_CAT_ANY == 11, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "ANY LBW - <1500, n (%)" = paste0(
+      format(sum(LBW_CAT_ANY == 12, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(LBW_CAT_ANY == 12, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "ANY LBW - missing, n (%)" = paste0(
+      format(sum(LBW_CAT_ANY == 55, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(LBW_CAT_ANY == 55, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")")
+    
+  )  %>%
+  t() %>% as.data.frame() %>% 
+  `colnames<-`(c(.[1,])) %>% 
+  slice(-1) 
+
+lowbirthweight_tab  %>% 
+  `rownames<-` (c(
+    "Missing Hours Since Birthweight Measured, n (%)",
+    "Missing PRISMA Birthweight, n (%)",
+    "Missing Facility Birthweight, n (%)",
+    "Missing PRISMA measured & Facility Birthweight, n (%)",
+    
+    ## PRISMA MEASURED 
+    "Birthweight >=2500g",
+    "Birthweight <2500g",
+    "Birthweight <1500g",
+    "Missing",
+    
+    ## ANY MEASURED 
+    "Birthweight >=2500g ",
+    "Birthweight <2500g ",
+    "Birthweight <1500g ",
+    "Missing "
+  )
+  ) %>% 
+  mutate_all(funs(str_replace(., "NaN", "0"))) %>% 
+  kbl(caption = "", booktabs = TRUE) %>%
+  kable_paper(bootstrap_options = "striped", 
+              full_width = T, html_font = "Cambria", position = "left",
+              latex_options = c("repeat_header", "HOLD_position")) %>% 
+  kable_styling(font_size = 14) %>%
+  row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
+  pack_rows("PRISMA measured birthweight (categorical), n (%)", 5, 8, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Any method measured birthweight (categorical), n (%)", 9, 12, label_row_css = "color: steelblue;") 
+
+```
+\newpage
+
+#### Figure 1a. Low birth weight: Histogram of birthweights across sites. 
+```{r lbw fig1a}
+
+lowbirthweight_nomissing <- lowbirthweight %>% filter(BWEIGHT_ANY > 0)
+
+ggplot(data=lowbirthweight_nomissing,
+       aes(x=BWEIGHT_ANY)) + 
+  geom_histogram() + #binwidth = 100
+  facet_grid(vars(SITE), scales = "free") +
+  scale_x_continuous(breaks = seq(0,5000,500)) + 
+  ggtitle("Birthweight by any reporting method, by Site") + 
+  ylab("Count") + 
+  xlab("Birthweight, g") + 
+  theme_bw() +
+  theme(strip.background=element_rect(fill="white")) + #color
+  theme(axis.text.x = element_text(vjust = 0.5, hjust=0.5), # angle = 60, 
+        legend.position="bottom",
+        legend.title = element_blank(),
+        panel.grid.minor = element_blank()) + 
+  geom_vline(mapping=aes(xintercept=1500), linetype ="dashed", color = "red") +
+  geom_vline(mapping=aes(xintercept=2500), linetype ="dashed", color = "red") 
+
+  
+```
+*Figure 1a. Distribution of birthweights across sites. Where PRISMA measurement was not available or if the PRISMA measurement was taken >72 hours following birth, the Facility reported birthweight was used. Dashed lines represent 1500g and 2500g reference points. 
+
+
+\newpage
+
+#### Figure 1b. Low birth weight: Histogram of hours following birth weight was assessed across sites. 
+```{r lbw fig1b}
+
+ggplot(data=lowbirthweight,
+       aes(x=BW_TIME)) + 
+  geom_histogram(binwidth = 1) + 
+  facet_grid(vars(SITE), scales = "free") +
+  scale_x_continuous(breaks = seq(0,96,8)) + 
+  ggtitle("Hours from birth infant was weighed, all births, by Site") + 
+  ylab("Count") + 
+  xlab("Hours") + 
+  theme_bw() +
+  theme(strip.background=element_rect(fill="white")) + #color
+  theme(axis.text.x = element_text(vjust = 0.5, hjust=0.5), # angle = 60, 
+        legend.position="bottom",
+        legend.title = element_blank(),
+        panel.grid.minor = element_blank()) +
+  geom_vline(mapping=aes(xintercept=24), linetype ="dashed", color = "red") +
+  geom_vline(mapping=aes(xintercept=48), linetype ="dashed", color = "red") + 
+  geom_vline(mapping=aes(xintercept=72), linetype ="dashed", color = "red")
+  
+```
+*Figure 1b. Hours following birth weight measurement recorded by PRISMA-trained staff (or Facility reported where PRISMA measurement not available). Report of "0" indicates the measurement was taken <1hr following birth. Dashed lines represent 24, 48, and 72 hour time points. 
+
+\newpage
+
+### Preterm Delivery & Preterm Birth
+**Definition:** Preterm delivery prior to 37 completed weeks of gestation* of a birth (live birth or stillbirth). Further classified as: Extremely preterm (<28 weeks), Very preterm (28-32 weeks), Moderate to late preterm (32-37 weeks), and Term (>=37 weeks).
+<br>
+<br>
+
+**Denominator:**
+<br>
+Any participant with a MNH09 form filled out with a reported "birth outcome" `(BIRTH_DSTERM_INF1-4=1 OR BIRTH_DSTERM_INF1-4=2 [MNH09])` AND has valid gestational age reported in MNH01 `(US_GA_WKS_AGE_FTS1-4 [MNH01], US_GA_DAYS_AGE_FTS1-4 [MNH01], GA_LMP_WEEKS_SCORRES [MNH01])`.
+<br>
+***Note:** Gestational age information collected in MNH01 is used to generate best obstetric estimates for GA, EDD, and estimated concpetion date. These constructed variables are then used to calculate GA at time of birth.* 
+<br>
+<br>
+
+**To be included as "non-Missing" for this outcome, a participant must have:**
+<br>
+**1.** Reported gestational age by either LMP or Ultrasound (varnames [form]: `US_GA_WKS_AGE_FTS1-4 [MNH01]`, `US_GA_DAYS_AGE_FTS1-4 [MNH01]`, `GA_LMP_WEEKS_SCORRES [MNH01]`).
+<br>
+**2.** Valid enrollment ultrasound visit date (varname [form]: `US_OHOSTDAT [MNH01]`)
+<br>
+**3.** Valid date of birth (varname [form]: `DELIV_DSSTDAT_INF1-4 [MNH09]`).
+<br>
+**4.** Birth outcome reported as a "Live birth" or "Fetal death" (varname [form]: `BIRTH_DSTERM_INF1-4 [MNH09]`).
+<br>
+<br>
+
+**Common causes for a participant to be marked as "Missing":**
+<br>
+**-** Participant is missing a reported GA by Ultrasound AND GA by LMP in MNH01.
+<br>
+**-** Participant is missing an enrollment ultrasound visit (`TYPE_VISIT=1`).
+<br>
+**-** Participant has multiple enrollment ultrasound visits (`TYPE_VISIT=1`).
+<br>
+**-** Default value is used for enrollment ultrasound visit date (`US_OHOSTDAT=07-07-1907`). 
+<br>
+**-** Birth outcome is reported as "77, Not applicable". 
+<br>
+<br>
+
+#### Table 2. Preterm Delivery & Preterm Birth
+*Values for missing gestational age reports by US and LMP are also reported in this table. For all variables, 1 indicates "Yes" and 0 indicates "No".*
+```{r, preterm birth, message = FALSE, warning = FALSE}
+
+# N(%) without both US and LMP; (MISSING_BOTH_US_LMP)
+# Distribution of GA_DIFF_DAYS; 
+# N% where US is used vs. where LMP is used. (BOE_METHOD (where 1 = US and 2 = LMP))
+# Histograms of GA at birth (GA_AT_BIRTH_WKS)
+
+# a. Preterm birth (<37 weeks): Delivery prior to 37 completed weeks of gestation (live or stillbirth). [varname: PRETERMBIRTH_LT37]
+# b. Preterm birth (<34 weeks): Delivery prior to 34 completed weeks of gestation (live or stillbirth). [varname: PRETERMBIRTH_LT34]
+# c. Preterm birth (<32 weeks): Delivery prior to 32 completed weeks of gestation (live or stillbirth). [varname: PRETERMBIRTH_LT32]
+# d. Preterm birth (<28 weeks): Delivery prior to 28 completed weeks of gestation (live or stillbirth). [varname: PRETERMBIRTH_LT28]
+# e. Preterm birth severity (categorical): Late preterm (34 to <37 wks), early preterm (32 to <34 wks), very preterm (28 to <32 wks), extermely preterm (<28 weeks) [varname: PRETERMBIRTH_CAT]
+
+mnh01_tab <- mnh01_constructed %>% 
+  rowwise() %>% 
+  group_by(SITE) %>% 
+  summarise(
+
+    "Missing both US and LMP GA" = paste0(
+      format(sum(is.na(BOE_METHOD)), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(is.na(BOE_METHOD))/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+
+    "BOE = Ultrasound" = paste0(
+      format(sum(BOE_METHOD == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(BOE_METHOD == 1, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "BOE = LMP" = paste0(
+      format(sum(BOE_METHOD == 2, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(BOE_METHOD == 2, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")")
+  ) %>% 
+  t() %>% as.data.frame() %>% 
+  `colnames<-`(c(.[1,])) %>% 
+  slice(-1) 
+
+
+    
+  
+preterm_birth_live_tab <- preterm_birth %>% 
+  filter(LIVEBIRTH == 1) %>% 
+  rowwise() %>% 
+  group_by(SITE) %>% 
+  summarise(
+    
+    "Preterm birth severity (categorical), n-1" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 11, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 11, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")"),
+    
+      "Preterm birth severity (categorical), n-2" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 12, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 12, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")"),
+    
+          "Preterm birth severity (categorical), n-3" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 13, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 13, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")"),
+    
+          "Preterm birth severity (categorical), n-4" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 14, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 14, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")"),
+    
+          "Preterm birth severity (categorical), n-5" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 15, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 15, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")"), 
+        
+    "Preterm birth severity (categorical), n-55" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 55, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 55, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")")
+
+    
+  )  %>%
+  t() %>% as.data.frame() %>% 
+  `colnames<-`(c(.[1,])) %>% 
+  slice(-1) 
+
+  
+preterm_birth_tab <- preterm_birth %>% 
+  rowwise() %>% 
+  group_by(SITE) %>% 
+  summarise(
+    
+    "Preterm birth severity (categorical), n-1" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 11, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 11, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")"),
+    
+      "Preterm birth severity (categorical), n-2" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 12, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 12, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")"),
+    
+          "Preterm birth severity (categorical), n-3" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 13, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 13, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")"),
+    
+          "Preterm birth severity (categorical), n-4" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 14, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 14, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")"),
+    
+          "Preterm birth severity (categorical), n-5" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 15, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 15, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")"), 
+        
+    "Preterm birth severity (categorical), n-55" = paste0(
+          format(sum(PRETERMBIRTH_CAT == 55, na.rm = TRUE), nsmall = 0, digits = 2),
+          " (",
+          format(round(sum(PRETERMBIRTH_CAT == 55, na.rm = TRUE)/sum(BIRTH_OUTCOME==1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+          ")")
+
+    
+  )  %>%
+  t() %>% as.data.frame() %>% 
+  `colnames<-`(c(.[1,])) %>% 
+  slice(-1) 
+
+ 
+bind_rows(mnh01_tab, preterm_birth_live_tab, preterm_birth_tab) %>% 
+  `rownames<-` (c(
+    "Missing both US and LMP GA, n (%)",
+    "BOE = Ultrasound, n (%)",
+    "BOE = LMP, n (%)",
+    
+    "Term (>= 37wks)",
+    "Late preterm (34 to <37 wks)",
+    "Early preterm (32 to <34 wks)",
+    "Very preterm (28 to <32 wks)",
+    "Extermely preterm (<28 weeks)",
+    "Missing",
+
+    "Term (>= 37wks) ",
+    "Late preterm (34 to <37 wks) ",
+    "Early preterm (32 to <34 wks) ",
+    "Very preterm (28 to <32 wks) ",
+    "Extermely preterm (<28 weeks) ",
+    "Missing "
+
+  )
+
+  ) %>% 
+  mutate_all(funs(str_replace(., "NaN", "0"))) %>% 
+  kbl(caption = "", booktabs = TRUE) %>%
+  kable_paper(bootstrap_options = "striped", 
+              full_width = T, html_font = "Cambria", position = "left",
+              latex_options = c("repeat_header", "HOLD_position")) %>% 
+  kable_styling(font_size = 16) %>%
+  row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
+  pack_rows("MNH01 GA Data", 1, 3, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Preterm birth severity (among livebirths) (categorical), n (%)", 4, 9, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Preterm delivery severity (among livebirths & stillbirths) (categorical), n (%)", 10, 15, label_row_css = "color: steelblue;") 
+
+
+```
+
+\newpage
+
+#### Figure 2a. Preterm Delivery: Distribution of days difference between GA by US and GA by LMP reporting across sites. 
+```{r preterm births fig2a}
+
+mnh01_constructed$GA_DIFF_DAYS = abs(mnh01_constructed$GA_DIFF_DAYS)
+
+summary_stats <- summary(mnh01_constructed$GA_DIFF_DAYS)
+
+ggplot(data=mnh01_constructed,
+       aes(x=abs(GA_DIFF_DAYS))) + 
+  geom_histogram() + #binwidth = 100
+  facet_grid(vars(SITE), scales = "free") +
+  scale_x_continuous(breaks = seq(0,175,25), 
+                     limits = c(0,175)) + 
+  ggtitle("Days difference between GA by US and GA by LMP, by Site") + 
+  ylab("Count") + 
+  xlab("Days difference") + 
+  # geom_text(
+  #   aes(x = Inf, y = Inf, label = paste(
+  #     "N:", length(GA_DIFF_DAYS), "\n",
+  #     "MIN:", summary_stats[1], "\n",
+  #     "P5:", quantile(GA_DIFF_DAYS, 0.05, na.rm = TRUE), "\n",
+  #     "MEAN:", round(mean(GA_DIFF_DAYS, na.rm = TRUE)), "\n",
+  #     "MEDIAN:", median(GA_DIFF_DAYS, na.rm = TRUE), "\n",
+  #     "P95:", quantile(GA_DIFF_DAYS, 0.95, na.rm = TRUE), "\n",
+  #     "MAX:", summary_stats[6]
+  #   )), 
+  #   vjust = 1, hjust = 1, size = 3, face = "bold", color = "black"
+  # ) + 
+  theme_bw() +
+  theme(strip.background=element_rect(fill="white")) + #color
+  theme(axis.text.x = element_text(vjust = 0.5, hjust=0.5), # angle = 60, 
+        legend.position="bottom",
+        legend.title = element_blank(),
+        panel.grid.minor = element_blank()) 
+
+```
+*Figure 2a. Pakistan is not reporting LMP for any participant, which is why they have no data above.  
+
+\newpage
+
+#### Figure 2b. Preterm Delivery: Distribution of gestational age at birth in weeks. 
+```{r preterm births fig2b}
+
+ggplot(data=preterm_birth,
+       aes(x=GA_AT_BIRTH_WKS)) + 
+  geom_histogram(binwidth = 1) + 
+  facet_grid(vars(SITE), scales = "free") +
+  scale_x_continuous(breaks = seq(20,45,1), 
+                     limits = c(20,45)) + 
+  ggtitle("Gestational age at birth (weeks), by Site") + 
+  ylab("Count") + 
+  xlab("Gestational Age at Birth (Weeks)") + 
+  theme_bw() +
+  theme(strip.background=element_rect(fill="white")) + #color
+  theme(axis.text.x = element_text(vjust = 0.5, hjust=0.5), # angle = 60, 
+        legend.position="bottom",
+        legend.title = element_blank(),
+        panel.grid.minor = element_blank())
+  
+```
+*Figure 2b. Gestational age at birth was calculated by taking the difference between the DOB and "estimated conception date" determined by BOE.  
+
+\newpage
+
+### Size for Gestational Age (SGA)
+**Definition:** Birth weight of an infant per INTERGROWTH standards (Per infant, including livebirths, including multiples).
+<br>
+<br>
+
+**Denominator:**
+<br>
+Any participant with a MNH09 form filled out with a reported "live birth" `(BIRTH_DSTERM_INF1-4=1 [MNH09])` AND have an INFANTID in MNH09 `(INFANTID_INF1-4)` that can be linked to MNH11 `(INFANTID)` AND has a valid date of birth reported in MNH09 `(DELIV_DSSTDAT_INF1-4)` AND has valid gestational age reported in MNH01 `(US_GA_WKS_AGE_FTS1-4 [MNH01], US_GA_DAYS_AGE_FTS1-4 [MNH01], GA_LMP_WEEKS_SCORRES [MNH01])`. 
+<br>
+***Note:** Gestational age information collected in MNH01 is used to generate best obstetric estimates for GA, EDD, and estimated conception date. These constructed variables are then used to calculate GA at time of birth.* 
+<br>
+<br>
+
+
+**To be included as "non-Missing" for this outcome, a participant must have:**
+<br>
+**1.** Reported gestational age by either LMP or Ultrasound (varnames [form]: `US_GA_WKS_AGE_FTS1-4 [MNH01]`, `US_GA_DAYS_AGE_FTS1-4 [MNH01]`, `GA_LMP_WEEKS_SCORRES [MNH01]`).
+<br>
+**2.** Valid date of birth (varname [form]: `DELIV_DSSTDAT_INF1-4 [MNH09]`).
+<br>
+**3.** Birthweight measured by PRISMA staff <72 hours following birth OR facility reported birthweight where PRISMA not available (varnames [form]: `BW_EST_FAORRES [MNH11]`, `BW_FAORRES [MNH11]`, `BW_FAORRES_REPORT [MNH11]`).
+<br>
+**4.** Live birth (varname [form]: `BIRTH_DSTERM_INF1-4 [MNH09]`).
+<br>
+**5.** Sex of infant (varname [form]: `SEX_INF1-4 [MNH09]`).
+<br>
+<br>
+
+**Common causes for a particpant to be marked as "Missing":**
+<br>
+**-** Participant is missing a reported GA by Ultrasound AND GA by LMP in MNH01.
+<br>
+**-** Participant is missing an enrollment ultrasound visit (`TYPE_VISIT=1`).
+<br>
+**-** PRISMA-measured AND Facility-reported birthweights are missing from MNH11.
+<br>
+**-** MNH11 forms missing for infants (i.e. infantid present in MNH09, but is missing an MNH11 form).
+<br>
+**-** Gestational age at birth less than 33 weeks or over 42 weeks. 
+<br>
+<br>
+
+#### Table 3. Size for Gestational Age (SGA)
+```{r, sga, message = FALSE, warning = FALSE}
+#* 3. SGA
+# a. Size for gestational age - categorical. [varname: SGA_CAT]
+# b. Preterm small for gestational age: Preterm < 37 weeks AND SGA (<10th). [varname: INF_SGA_PRETERM]
+# c. Preterm appropriate for gestational age: Preterm < 37 weeks AND not SGA (<10th). [varname: INF_AGA_PRETERM]
+# d. Term small for gestational age: Term >=37 weeks AND SGA (<10th). [varname: INF_SGA_TERM]
+# e. Term appropriate for gestational age: Term >=37 weeks AND not SGA (<10th). [varname: INF_AGA_TERM]
+
+sga_tab <- sga %>% 
+  rowwise() %>% 
+  group_by(SITE) %>% 
+  summarise(
+
+    "SGA <3rd percentile" = paste0(
+      format(sum(SGA_CAT == 11), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(SGA_CAT == 11, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+
+    "SGA <10th percentile" = paste0(
+      format(sum(SGA_CAT == 12), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(SGA_CAT == 12, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "AGA 10th to <90th percentile" = paste0(
+      format(sum(SGA_CAT == 13), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(SGA_CAT == 13, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "LGA >= 90th percentile" = paste0(
+      format(sum(SGA_CAT == 14), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(SGA_CAT == 14, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Missing" = paste0(
+      
+      format(sum(SGA_CAT == 55), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(SGA_CAT == 55, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+  ) %>% 
+  t() %>% as.data.frame() %>% 
+  `colnames<-`(c(.[1,])) %>% 
+  slice(-1) 
+
+
+sga_tab %>% 
+  `rownames<-` (c(
+    "SGA <3rd percentile",
+    "SGA <10th percentile",
+    "AGA 10th to <90th percentile",
+    "LGA >= 90th percentile",
+    "Missing"
+  )
+
+  ) %>% 
+  mutate_all(funs(str_replace(., "NaN", "0"))) %>% 
+  kbl(caption = "", booktabs = TRUE) %>%
+  kable_paper(bootstrap_options = "striped", 
+              full_width = T, html_font = "Cambria", position = "left",
+              latex_options = c("repeat_header", "HOLD_position")) %>% 
+  kable_styling(font_size = 16) %>%
+  row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
+  pack_rows("Size for Gestational Age (Cateogorical), n (%)", 1, 5, label_row_css = "color: steelblue;")  
+
+
+```
+
+
+\newpage
+
+#### Figure 3a. SGA: Distribution of INTERGROWTH percentiles across sites.  
+```{r sga fig3a}
+
+ggplot(data=sga,
+       aes(x=SGA)) + 
+  geom_histogram(binwidth = 5) + 
+  facet_grid(vars(SITE), scales = "free") +
+  scale_x_continuous(breaks = seq(0,100,10),
+                     limits = c(0,100)) +
+  ggtitle("Distribution of INTERGROWTH percentiles, by Site") + 
+  ylab("Count") + 
+  xlab("INTERGROWTH Percentile") + 
+  theme_bw() +
+  theme(strip.background=element_rect(fill="white")) + #color
+  theme(axis.text.x = element_text(vjust = 0.5, hjust=0.5), # angle = 60, 
+        legend.position="bottom",
+        legend.title = element_blank(),
+        panel.grid.minor = element_blank()) 
+
+```
+
+
+\newpage
+
+### Mortality
+**Definition:** Death of a liveborn baby. Further stratified as neonatal mortality (death of a liveborn baby in the first 28 days of life) and infant mortality (death of a liveborn baby in the first 365 days of life).
+<br>
+<br>
+
+**Denominator:**
+<br>
+All infants with a reported live birth in MNH11 `(INF_DSTERM=1)` AND have an INFANTID in MNH09 `(INFANTID_INF1-4)` that can be linked to MNH11 `(INFANTID)` AND has a valid date of birth reported in MNH09 `(DELIV_DSSTDAT_INF1-4)`.
+<br>
+<br>
+
+
+**To be included as "non-Missing" for this outcome, a participant must have:**
+<br>
+**1.** Valid date of birth (varname [form]: `DELIV_DSSTDAT_INF1-4 [MNH09]`). 
+<br>
+**2.** Birth outcome reported as "Live birth" (varname [form]: `INF_DSTERM [MNH11]`)
+<br>
+**3.** Consistent infantids between MNH09 and MNH11 to link forms.
+<br>
+<br>
+
+**Common causes for a particpant to be marked as "Missing":**
+<br>
+**-** Participant is missing an delivery from (MNH09).  
+**-** Infant is missing a MNH11 forms (i.e. infantid present in MNH09, but is missing an MNH11 form).
+<br>
+<br>
+
+#### Table 4. Mortality
+```{r, mortality, message = FALSE, warning = FALSE}
+#  4. Neonatal mortality: Denominator is all live births reported in MNH11 with mh09 filled out 
+  # a. <24 hours 
+  # b. Early neontal mortality: first  7 days 
+  # c. Late neonatal mortality: between 7 & 28 days
+
+## remove mortality section subsection and add "total row" 
+## add denominator row 
+## update denominotrs to be DENOM_28d & DENOM_365d
+## add death timing missing (66) to summary sub-tab and timing sub-tabs
+
+mortality_tab <- mortality %>% ## denominator is anyone with an MNH09 or MNH11 filled out 
+  rowwise() %>% 
+  group_by(SITE) %>% 
+  summarise(
+
+    "Missing MNH09 (but has MNH11 or MNH24)" = paste0(
+      format(sum(MISSING_MNH09 == 1), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(MISSING_MNH09 == 1, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Missing MNH11 (but has MNH09 or MNH24)" = paste0(
+      format(sum(MISSING_MNH11 == 1), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(MISSING_MNH11 == 1, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "MNH24 Closeout MOMIDs missing from MNH02 (enrollment)" = paste0(
+      format(sum(ID_MISSING_ENROLLMENT == 1), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(ID_MISSING_ENROLLMENT == 1, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
+      ")"), 
+    
+    "Death reported but missing time of death^a^" = paste0(
+      format(sum(DTH_TIME_MISSING == 1), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(DTH_TIME_MISSING == 1, na.rm = TRUE)/sum(DTH_INDICATOR == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+
+
+  ) %>% 
+  t() %>% as.data.frame() %>% 
+  `colnames<-`(c(.[1,])) %>% 
+  slice(-1) 
+
+neo_mortality_tab <- neonatal_mortality %>% ## denominator is all live births with an mnh11 and mnh09 filled out  
+  rowwise() %>% 
+  group_by(SITE) %>% 
+  summarise(
+    "Denominator " = paste0(
+      format(sum(DENOM_28d == 1, na.rm = TRUE), nsmall = 0, digits = 2)),
+
+    "Death <24 hours of life" = paste0(
+      format(sum(NEO_DTH_CAT == 11), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(NEO_DTH_CAT == 11, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Death <7 days of life" = paste0(
+      format(sum(NEO_DTH_CAT == 12), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(NEO_DTH_CAT == 12, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Death <28 days of life" = paste0(
+      format(sum(NEO_DTH_CAT == 13), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(NEO_DTH_CAT == 13, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Death reported but missing time of death " = paste0(
+      format(sum(NEO_DTH_CAT == 66), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(NEO_DTH_CAT == 66, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Total neonatal deaths " = paste0(
+      format(sum(DTH_28D == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(DTH_28D == 1, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")")
+
+
+  ) %>% 
+  t() %>% as.data.frame() %>% 
+  `colnames<-`(c(.[1,])) %>% 
+  slice(-1) 
+
+
+inf_mortality_tab <- infant_mortality %>% ## denominator is all live births with an mnh11 and mnh09 filled out  
+  rowwise() %>% 
+  group_by(SITE) %>% 
+  summarise(
+
+    "Denominator  " = paste0(
+      format(sum(DENOM_365d == 1, na.rm = TRUE), nsmall = 0, digits = 2)),
+
+    "Death <365 days of life" = paste0(
+      format(sum(INF_DTH_CAT == 14), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(INF_DTH_CAT == 14, na.rm = TRUE)/sum(DENOM_365d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"), 
+    
+    "Death reported but missing time of death  " = paste0(
+      format(sum(INF_DTH_CAT == 66), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(INF_DTH_CAT == 66, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+
+    
+    "Total infant deaths  " = paste0(
+      format(sum(INF_DTH_CAT == 14, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(INF_DTH_CAT == 14, na.rm = TRUE)/sum(DENOM_365d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")")
+
+  ) %>% 
+  t() %>% as.data.frame() %>% 
+  `colnames<-`(c(.[1,])) %>% 
+  slice(-1) 
+
+
+bind_rows(mortality_tab, neo_mortality_tab, inf_mortality_tab)  %>% 
+  mutate_all(funs(str_replace(., "NaN", "0"))) %>% 
+  mutate_all(funs(str_replace(., "NA", "0"))) %>%
+  kbl(caption = "", booktabs = TRUE, longtable = TRUE) %>%
+  kable_paper(bootstrap_options = "striped", 
+              full_width = T, html_font = "Cambria", position = "left",
+              latex_options = c("repeat_header", "HOLD_position")) %>% 
+  kable_styling(font_size = 14) %>%
+  row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
+  row_spec(c(5,11), bold = TRUE) %>% 
+  pack_rows("Data Issues", 1, 4, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Timing of Neonatal Mortality^b^", 5, 10, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Timing of Infant Mortality^c^", 11,14, label_row_css = "color: steelblue;")  
+
+```
+^a^ Denominator is all live births with a reported death in MNH24.
+<br>
+^b^ Denominator is all live births with MNH09 and MNH11 filled out AND have passed the risk period OR died within the risk period (risk period: age = 28days).
+<br>
+^c^ Denominator is all live births with MNH09 and MNH11 filled out AND have passed the risk period OR died within the risk period (risk period: age = 365days). 
+<br>
+
+\newpage
+### Stillbirth
+**Definition:** Death prior to delivery of a fetus at ≥20 weeks of gestation (or >350 g weight, if gestational age is unavailable).
+<br>
+<br>
+
+**Denominator:**
+<br>
+Any participant with a birth outcome reported in MNH04 `(PRG_DSDECOD)` or MNH11 `(INF_DSTERM)`
+<br>
+<br>
+    
+    
+**To be included as "non-Missing" for this outcome, a participant must have:**
+<br>
+**1.** Valid date of birth OR valid fetal loss date (varname [form]: `FETAL_LOSS_DSSTDAT [MNH04]` OR `DELIV_DSSTDAT_INF1-4 [MNH09]`).
+<br>
+**2.** Birth outcome reported in MNH04 or MNH11 (varname [form]: `PRG_DSDECOD [MNH04]` OR `INF_DSTERM [MNH11]`)
+<br>
+**3.** Valid signs of life reported in MNH09 and MNH11 (varname [form]: `CRY_CEOCCUR_INF1-4 [MNH09]`, `FHR_VSTAT_INF1-4 [MNH09]`, `MACER_CEOCCUR_INF1-4 [MNH09]`, `CORD_PULS_CEOCCUR_INF1-4 [MNH09]`, `BREATH_FAIL_CEOCCUR [MNH11]`)
+<br>
+<br>
+
+**Common causes for a particpant to be marked as "Missing":**
+<br>
+**-** Participant is missing an delivery from (MNH09).  
+**-** Signs of life are incomplete (high frequency of "77").
+<br>
+<br>
+
+#### Table 5. Stillbirth
+```{r, stillbirth, message = FALSE, warning = FALSE}
+
+stillbirth_tab <- stillbirth %>% ## denominator is anyone with a birth outcoem reported 
+  rowwise() %>% 
+  group_by(SITE) %>% 
+  summarise(
+
+    "Fetal loss reported in MNH04 but missing MNH09" = paste0(
+      format(sum(MISSING_MNH09 == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(MISSING_MNH09 == 1, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Fetal loss or fetal death reported but missing signs of life (NA or 77 reported)^a^" = paste0(
+      format(sum(MISSING_SIGNS_OF_LIFE == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(MISSING_SIGNS_OF_LIFE == 1, na.rm = TRUE)/sum(BIRTH_OUTCOME == 0, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Early Stillbirth: Death prior to delivery at 20 to 27wks gestatation" = paste0(
+      format(sum(STILLBIRTH_GESTAGE_CAT == 11, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(STILLBIRTH_GESTAGE_CAT == 11, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"), 
+    
+    "Late Stillbirth: Death prior to delivery at 28 to 36wks gestatation" = paste0(
+      format(sum(STILLBIRTH_GESTAGE_CAT == 12, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(STILLBIRTH_GESTAGE_CAT == 12, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"), 
+    
+    "Term Stillbirth: Death prior to delivery >=37wks gestatation" = paste0(
+      format(sum(STILLBIRTH_GESTAGE_CAT == 13, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(STILLBIRTH_GESTAGE_CAT == 13, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"), 
+    
+  "Total Stillbirths Reported" = paste0(
+      format(sum(BIRTH_OUTCOME == 0, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(BIRTH_OUTCOME == 0, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"), 
+
+    
+    "Missing" = paste0(
+      format(sum(STILLBIRTH_GESTAGE_CAT == 55, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(STILLBIRTH_GESTAGE_CAT == 55, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"), 
+    
+        
+   "Antepartum" = paste0(
+      format(sum(STILLBIRTH_TIMING == 11, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(STILLBIRTH_TIMING == 11, na.rm = TRUE)/sum(BIRTH_OUTCOME == 0, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"), 
+    
+    "Intrapartum" = paste0(
+      format(sum(STILLBIRTH_TIMING == 12, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(STILLBIRTH_TIMING == 12, na.rm = TRUE)/sum(BIRTH_OUTCOME == 0, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+   
+    "Don't Know" = paste0(
+      format(sum(STILLBIRTH_TIMING == 99, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(STILLBIRTH_TIMING == 99, na.rm = TRUE)/sum(BIRTH_OUTCOME == 0, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+
+  ) %>% 
+  t() %>% as.data.frame() %>% 
+  `colnames<-`(c(.[1,])) %>% 
+  slice(-1) 
+
+stillbirth_tab %>% 
+  mutate_all(funs(str_replace(., "NaN", "0"))) %>% 
+  mutate_all(funs(str_replace(., "NA", "0"))) %>%
+  kbl(caption = "", booktabs = TRUE, longtable = TRUE) %>%
+  kable_paper(bootstrap_options = "striped", 
+              full_width = T, html_font = "Cambria", position = "left",
+              latex_options = c("repeat_header", "HOLD_position")) %>% 
+  kable_styling(font_size = 13) %>%
+  row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
+  #row_spec(c(1,3,9), bold = TRUE) %>% 
+  pack_rows("Data Issues", 1, 2, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Stillbirth (Categorical)", 3, 7, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Timing of Stillbirth^a^", 8,10, label_row_css = "color: steelblue;")  
+
+
+```
+^a^ Denominator is all reported stillbirths. 
+<br>
+
+
+
+
+
