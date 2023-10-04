@@ -14,6 +14,15 @@ the outcomes coded here can be found in the PRISMA protocol.
 
 - R code: Stacie (<stacie.loisate@gwu.edu>)
 
+## Codes included:
+
+**`Infant-Constructed-Variables.R`** reads in the data and generates the
+constructed variables.
+
+**`Infant-Constructed-Outcomes-Tables.Rmd`** generates a report with key
+metrics for each of the constructed variables generated in the previous
+code.
+
 ## Outcomes included in this version:
 
 - Low birth-weight
@@ -34,12 +43,3 @@ the outcomes coded here can be found in the PRISMA protocol.
 - MNH14: Infant Point-of-Care Diagnostics
 - MNH15: Infant Vaccination Status
 - MNH24: Infant Closeout
-
-## Codes included:
-
-**`Infant-Constructed-Variables.R`** reads in the data and generates the
-constructed variables.
-
-**`Infant-Constructed-Outcomes-Tables.Rmd`** generates a report with key
-metrics for each of the constructed variables generated in the previous
-code.
