@@ -1,5 +1,5 @@
 ---
-title: "<span style='font-size: 18px'> <span style='text-align: center'> PRISMA-Infant-Outcomes (Issued: 2023-10-03)"
+title: "<span style='font-size: 18px'> <span style='text-align: center'> PRISMA-Infant-Outcomes (Issued: 2023-10-10)"
 output:
   html_document:
     df_print: paged
@@ -30,10 +30,11 @@ knit: (function(inputFile, encoding) {
 
 
 ##### **Includes data from synapse last updated:** {.unlisted .unnumbered}
-##### Kenya : 2023-09-29 {.unlisted .unnumbered}
-##### Pakistan : 2023-09-29 {.unlisted .unnumbered}
-##### Ghana : 2023-09-29 {.unlisted .unnumbered}
-##### Zambia : 2023-09-29 {.unlisted .unnumbered}
+##### Kenya : 2023-10-06 {.unlisted .unnumbered}
+##### Pakistan : 2023-10-06 {.unlisted .unnumbered}
+##### Ghana : NA (no 2023-10-06 upload) {.unlisted .unnumbered}
+##### Zambia : 2023-10-06 {.unlisted .unnumbered}
+##### India-CMC : 2023-10-06 {.unlisted .unnumbered}
 
 ```{css, echo=FALSE}
 .table caption {
@@ -208,13 +209,13 @@ lowbirthweight_tab  %>%
     
     ## PRISMA MEASURED 
     "Birthweight >=2500g",
-    "Birthweight <2500g",
+    "Birthweight 1500 to <2500g",
     "Birthweight <1500g",
     "Missing",
     
     ## ANY MEASURED 
     "Birthweight >=2500g ",
-    "Birthweight <2500g ",
+    "Birthweight 1500 to <2500g ",
     "Birthweight <1500g ",
     "Missing "
   )
@@ -474,17 +475,17 @@ bind_rows(mnh01_tab, preterm_birth_live_tab, preterm_birth_tab) %>%
     "BOE = Ultrasound, n (%)",
     "BOE = LMP, n (%)",
     
-    "Term (>= 37wks)",
-    "Late preterm (34 to <37 wks)",
-    "Early preterm (32 to <34 wks)",
-    "Very preterm (28 to <32 wks)",
+    "Term (>= 37 weeks)",
+    "Late preterm (34 to <37 weeks)",
+    "Early preterm (32 to <34 weeks)",
+    "Very preterm (28 to <32 weeks)",
     "Extermely preterm (<28 weeks)",
     "Missing",
 
-    "Term (>= 37wks) ",
-    "Late preterm (34 to <37 wks) ",
-    "Early preterm (32 to <34 wks) ",
-    "Very preterm (28 to <32 wks) ",
+    "Term (>= 37 weeks) ",
+    "Late preterm (34 to <37 weeks) ",
+    "Early preterm (32 to <34 weeks) ",
+    "Very preterm (28 to <32 weeks) ",
     "Extermely preterm (<28 weeks) ",
     "Missing "
 
@@ -551,7 +552,7 @@ ggplot(data=mnh01_constructed,
 ```{r preterm births fig2b}
 
 ggplot(data=preterm_birth,
-       aes(x=GA_AT_BIRTH_WKS)) + 
+       aes(x=GESTAGEBIRTH_BOE)) + 
   geom_histogram(binwidth = 1) + 
   facet_grid(vars(SITE), scales = "free") +
   scale_x_continuous(breaks = seq(20,45,1), 
@@ -921,36 +922,42 @@ Any participant with a birth outcome reported in MNH04 `(PRG_DSDECOD)` or MNH11 
 #### Table 5. Stillbirth
 ```{r, stillbirth, message = FALSE, warning = FALSE}
 
-stillbirth_tab <- stillbirth %>% ## denominator is anyone with a birth outcoem reported 
+stillbirth_tab <- stillbirth %>% ## denominator is anyone with a birth outcome reported 
   rowwise() %>% 
   group_by(SITE) %>% 
   summarise(
 
-    "Fetal loss reported in MNH04 but missing MNH09" = paste0(
+    "Fetal loss reported in MNH04 but missing MNH09^a^" = paste0(
       format(sum(MISSING_MNH09 == 1, na.rm = TRUE), nsmall = 0, digits = 2),
       " (",
       format(round(sum(MISSING_MNH09 == 1, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")"),
     
-    "Fetal loss or fetal death reported but missing signs of life (NA or 77 reported)^a^" = paste0(
+    "Fetal loss or fetal death reported but missing signs of life (NA or 77 reported)^b^" = paste0(
       format(sum(MISSING_SIGNS_OF_LIFE == 1, na.rm = TRUE), nsmall = 0, digits = 2),
       " (",
       format(round(sum(MISSING_SIGNS_OF_LIFE == 1, na.rm = TRUE)/sum(BIRTH_OUTCOME == 0, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")"),
     
-    "Early Stillbirth: Death prior to delivery at 20 to 27wks gestatation" = paste0(
+    "GA at delivery <20 weeks^a^" = paste0(
+      format(sum(GESTAGE_UNDER20 == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      " (",
+      format(round(sum(GESTAGE_UNDER20 == 1, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      ")"),
+    
+    "Early Stillbirth: Death prior to delivery at 20 to 27 weeks gestatation" = paste0(
       format(sum(STILLBIRTH_GESTAGE_CAT == 11, na.rm = TRUE), nsmall = 0, digits = 2),
       " (",
       format(round(sum(STILLBIRTH_GESTAGE_CAT == 11, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")"), 
     
-    "Late Stillbirth: Death prior to delivery at 28 to 36wks gestatation" = paste0(
+    "Late Stillbirth: Death prior to delivery at 28 to 36 weeks gestatation" = paste0(
       format(sum(STILLBIRTH_GESTAGE_CAT == 12, na.rm = TRUE), nsmall = 0, digits = 2),
       " (",
       format(round(sum(STILLBIRTH_GESTAGE_CAT == 12, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")"), 
     
-    "Term Stillbirth: Death prior to delivery >=37wks gestatation" = paste0(
+    "Term Stillbirth: Death prior to delivery >=37 weeks gestatation" = paste0(
       format(sum(STILLBIRTH_GESTAGE_CAT == 13, na.rm = TRUE), nsmall = 0, digits = 2),
       " (",
       format(round(sum(STILLBIRTH_GESTAGE_CAT == 13, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
@@ -1003,13 +1010,15 @@ stillbirth_tab %>%
   kable_styling(font_size = 13) %>%
   row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
   #row_spec(c(1,3,9), bold = TRUE) %>% 
-  pack_rows("Data Issues", 1, 2, label_row_css = "color: steelblue;") %>% 
-  pack_rows("Stillbirth (Categorical)", 3, 7, label_row_css = "color: steelblue;") %>% 
-  pack_rows("Timing of Stillbirth^a^", 8,10, label_row_css = "color: steelblue;")  
+  pack_rows("Data Issues", 1, 3, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Stillbirth (Categorical)^a^", 4, 8, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Timing of Stillbirth^b^", 9,11, label_row_css = "color: steelblue;")  
 
 
 ```
-^a^ Denominator is all reported stillbirths. 
+^a^ Denominator is all participants with a birth outcome (`INF_DSTERM=1 or 0 [MNH11]` OR `PRG_DSDECOD=2 or 3 [MNH04]`). 
+<br>
+^b^ Denominator is all reported stillbirths. 
 <br>
 
 
