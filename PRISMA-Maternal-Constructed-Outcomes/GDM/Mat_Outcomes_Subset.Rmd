@@ -22,24 +22,10 @@ README:
 This file creates a subset data that will be used in the GDM variable construction. 
 1. Run this file first.
 
-#TODO: 
-# - Need to look at Visit=13s and 14s (unscheduled ANC=13 and PNC=14) - this is not working currently in AWS dataset.
-# - Include all the unscheduled visits and account by date. 
-# - CRITICAL INTERVENTIONS var needs to have hospitalization vars included. DONE
-# 5. UTERINE RUPTURE = MAT_UTER_RUP --> need to add hospitalization - DONE
-# 6. Fix is.na for all of anemia. It should be a !is.na statement & between () - DONE
-# 7. Fix Anemia categories for trimesters and for PNC visits - make them specific. 
-# 8. Add Add non-schedule PNC visits - TYPE_VISIT=14 to LATE_MAT_DEATH
-# 9. Add MNH_19 13_1, 13_2 based on date (OBSSTDAT)
-# - GESTATIONAL DIABETES: ALL OF MEASURED variables are NA - FASTING OGTT, HbA1c# 
-
-NOTES:
-- If a visit hasn't happened for even a single woman say PNC26 (VISIT11) then those variables won't be there when you create the wider version b/c the TYPE_VISIT=11 doesn't exist. This is the case for M08_CBC_HB_LBORRES_11 or M08_CBC_HB_LBORRES_12 let's say).
-- PRISMA - no CBC after ENROLLMENT needed - so data is not missing in the table above. CBC IS A REMAPP REQUIREMENT.  
-    - Keep CBC measurement over POC measurement for classifying ANEMIA.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 
 ```{r, warning=FALSE}
 library(readxl)
@@ -47,7 +33,6 @@ library(dplyr)
 library(ggplot2)
 library(knitr)
 library(stringr)
-# library(ThemePark)
 library(purrr)
 library(lubridate)
 library(readr)
@@ -57,8 +42,7 @@ library(tableone)
 library(kableExtra)
 
 ```
-The varname structure for the newly integrated forms (hospitalizations, adverse events, and protocol deviation) are as follows:
-“M[xx]_varname_VISIT[y], where [xx] is the form number and [y] is the visit sequence number (i.e. if first hospitalization, this will be 1, second hospitalization will be 2…..)
+
 
 ```{r echo=FALSE}
 # path_to_data <- 'Z:/SynapseCSVs/Kenya/2023-07-28/' # If MNH*.xlsx files are located elsewhere, set this to, for example, 'data/' or '//TNT/...'
