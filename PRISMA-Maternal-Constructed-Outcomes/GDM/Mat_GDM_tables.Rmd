@@ -56,6 +56,7 @@ library(RColorBrewer)
 # AMONG WOMEN WHO HAVE A VISIT 3 (ANC28)
 diabetes_df <- read.csv('../data_out/mat_diabetes_fortables.csv', header = TRUE)
 df <- diabetes_df # the file that is generated in 'Mat_GDM_analysis.Rmd' -- run that first but make sure to subset on VISIT 3.
+#Test comment
 ```
 \newpage
 
@@ -145,7 +146,7 @@ diabetes_table <- df %>%
     "Missing MNH08 form at ANC28***, n (%)" = 
       paste0(sum(M08_MAT_VISIT_FORM_COMPLETED_3==0),
              " (",
-             format(round(sum(M08_MAT_VISIT_FORM_COMPLETED_3==0)/(sum(ANC28_PASS==3))*100, 2),nsmall=2, digits=3), # this is missing the ANC28 form out of everyone who has passed ANC28
+             format(round(sum(M08_MAT_VISIT_FORM_COMPLETED_3==0)/(sum(ANC28_PASS==1))*100, 2),nsmall=2, digits=3), # this is missing the ANC28 form out of everyone who has passed ANC28
              ")"),
     
     "Missing ANC28 Pretest Fasting Glucose: M08_BGLUC_PRETEST_MMOLL_LBORRES_3, n (%)" =
