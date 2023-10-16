@@ -3,8 +3,6 @@
 #* Drafted: 11 October 2023, Stacie Loisate
 #* Last updated: 12 October 2023
  
- 
-#* This code will output quick cross tabs of the data that corresponds to the flowchart linked here: 
 #* Due to site-specific processes, we have left areas for sites to use, if needed (with "FOR SITES TO FILL OUT" in the code below)
 
 #* Steps to running the code: 
