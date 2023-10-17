@@ -4,7 +4,8 @@ author: "Fouzia Farooq"
 date: "`r Sys.Date()`"
 output: html_document
 ---
-
+#TODO EXCLUDE PPL WITH HBA1C HIGh from missing info. (Those who have high hba1c at enrollment will not have a fasting/ogtt test)
+# Remove everyone who has a high hba1c from calc. Missing in having a fasting test and OGTT b/c these ppl can’t have GDM then and their test won’t be done either.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -33,6 +34,7 @@ WOMEN WHO WERE ENROLLED >18 WEEKS WILL NOT HAVE AN ANC20 VISIT FORM BUT THEY SHO
 ```{r}
 # merged_df <- readRDS('../data_out/merged_df.RDS')
 diabetes_df <- read.csv('../data_out/mat_diabetes_vars.csv', header = TRUE)
+window_subset_df <- read.csv('../data_out/window_subset_df.csv', header = TRUE)
 ```
 
 # Convert "1907-07-07" to NA:
@@ -59,7 +61,7 @@ diabetes_df <- read.csv('../data_out/mat_diabetes_vars.csv', header = TRUE)
 # ---- 66:66, Refused to answer
 # ---- 99:99, Don't know
 ```{r echo=FALSE}
-CONVERT_NA <- FALSE
+CONVERT_NA <- TRUE
 if(CONVERT_NA ==TRUE){
   
   diabetes_df <- diabetes_df %>% #b/c I am passing in the entire dataframe, I don't need to specify the first parameter.
@@ -98,37 +100,6 @@ if(CONVERT_NA ==TRUE){
 }
 ```
 
-```{r}
-window_subset_df <- merged_df %>% 
-  select(MOMID, PREGID, SITE, DELIVERED_FF, BOE_GA_WKS, BOE_GA_DAYS, EST_CONCEP_DATE,
-         EDD_BOE, GA_ENROLL_WKS, GA_ENROLL_DAYS, DOB, DOB_DATEONLY, 
-         
-         starts_with(c("M04_MAT_VISIT_FORM_", "M04_MAT_VISIT_wPERSON_",
-                     "M08_MAT_VISIT_FORM_", "M08_MAT_VISIT_wPERSON_")),
-         
-         ENROLL_ONTIME, ENROLL_LATE, 
-         ANC20_ONTIME, ANC20_LATE,
-         ANC28_ONTIME, ANC28_LATE,
-         ANC32_ONTIME, ANC28_LATE,
-         ANC36_ONTIME, ANC36_LATE,
-         
-         M04_ENROLL_OVERDUE, M04_ANC20_OVERDUE, M04_ANC28_OVERDUE,
-         M04_ANC32_OVERDUE, M04_ANC36_OVERDUE,
-         
-         M08_ENROLL_OVERDUE, M08_ANC20_OVERDUE, M08_ANC28_OVERDUE,
-         M08_ANC32_OVERDUE, M08_ANC36_OVERDUE,
-         
-         ENROLL_PASS, ANC20_PASS, ANC28_PASS, ANC32_PASS, ANC36_PASS,
-         
-         ENROLL_PASS_LATE, ANC20_PASS_LATE, ANC28_PASS_LATE, ANC32_PASS_LATE, ANC36_PASS_LATE,
-         
-         # GA AT VISIT:
-         M04_GA_AT_VISIT_1, M04_GA_AT_VISIT_2, M04_GA_AT_VISIT_3, M04_GA_AT_VISIT_4, M04_GA_AT_VISIT_5,
-         M08_GA_AT_VISIT_1,  M08_GA_AT_VISIT_2,  M08_GA_AT_VISIT_3,  M08_GA_AT_VISIT_4,  M08_GA_AT_VISIT_5,
-         GA_AT_DELIV_6)# JUST NEED ONE B/C M08 IS OPTIONAL AT DELIVERY)
-
-temp.df <- merged_df %>% filter(SITE=="Zambia") %>% select(MOMID, M08_LBSTDAT_3, M08_MAT_VISIT_MNH08_3,  M08_MAT_VISIT_FORM_COMPLETED_3, M08_MAT_VISIT_wPERSON_COMPLETED_3) # 
-```
 
 # SET TO WOMEN WHO HAVE VISIT 3
 ```{r}
@@ -138,12 +109,25 @@ diabetes_df2 <- left_join(diabetes_df, window_subset_df,
 # diabetes_df2 <- diabetes_df  %>% filter(!is.na(M08_LBSTDAT_3)) #THOSE WHO HAVE A VISIT_3 FORM 
 ```
 
+```{r}
+temp.df <- diabetes_df2 %>% select(MOMID, SITE, M08_MAT_VISIT_MNH08_1, M08_MAT_VISIT_FORM_COMPLETED_1, M08_MAT_VISIT_MNH08_3, M08_MAT_VISIT_FORM_COMPLETED_3, ANC32_PASS)
+
+missing_mnh08_diab_df <- diabetes_df2 %>%
+  select(MOMID, PREGID, SITE, M08_MAT_VISIT_MNH08_1, M08_MAT_VISIT_FORM_COMPLETED_1, ENROLL_PASS,
+         M08_MAT_VISIT_MNH08_3, M08_MAT_VISIT_FORM_COMPLETED_3, ANC28_PASS)
+
+temp.df %>% summarize(n())
+write.csv(missing_mnh08_diab_df, '../data_out/missing_mnh08_df_diab_20231017.csv')
+```
+
 # WOMEN WHO HAVE A GA >=20 WEEKS
 ```{r}
 diabetes_df3 <- diabetes_df2 %>%
   filter(floor(M08_GA_AT_VISIT_3/7) >=20) %>% 
   filter(ANC28_PASS==1) # Ask Emily - if she wants this or not. 
 
+temp.df <- diabetes_df3 %>%
+  select(MOMID, SITE, M08_MAT_VISIT_MNH08_3, M08_MAT_VISIT_FORM_COMPLETED_3, ANC28_PASS, ENROLL_PASS)
 
 temp.df2 <- merged_df %>% filter(SITE=="Zambia") %>%
   select(MOMID, SITE, M08_GA_AT_VISIT_3, M08_LBSTDAT_3, M08_BGLUC_ORAL_1HR_MMOLL_LBORRES_3, 
@@ -188,8 +172,7 @@ Look at:
 # 2. ALL OF MEASURED variables are NA - FASTING OGTT, HbA1c# 
 
 ##################################################################################
-
-############ 
+temp.df <- diabetes_df3 %>% select(MOMID, SITE, M08_HBA1C_PRCNT_1) %>% filter(SITE=="Pakistan") 
 # MEASURED # 
 ############
 
@@ -277,7 +260,7 @@ table(diabetes_df$GEST_DIAB_MEAS_TEST, diabetes_df$SITE)
 round(prop.table(table(diabetes_df$GEST_DIAB_MEAS_TEST, diabetes_df$SITE, useNA = "always"), margin=2)*100,2)
 
 # RUN THIS WRITE.CSV CODE SO THAT 'MAT_GDM_TABLES.RMD' RUNS
-write.csv(diabetes_df, '../data_out/mat_diabetes_fortables.csv') # restricted to women who have a visit 3. 
+write.csv(diabetes_df, '../data_out/mat_diabetes_fortables_20231017.csv') # restricted to women who have a visit 3. 
 
 # temp.df <- diabetes_df %>%
 #   select(MOMID, PREGID, SITE, DELIVERED_FF, GEST_DIAB_MEAS, M08_HBA1C_LBORRES_1) %>% filter(SITE=="Pakistan")

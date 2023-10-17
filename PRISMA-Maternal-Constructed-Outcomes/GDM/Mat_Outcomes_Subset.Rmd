@@ -1264,7 +1264,8 @@ window_subset_df <- merged_df %>%
          EDD_BOE, GA_ENROLL_WKS, GA_ENROLL_DAYS, DOB, DOB_DATEONLY, 
          
          starts_with(c("M04_MAT_VISIT_FORM_", "M04_MAT_VISIT_wPERSON_",
-                     "M08_MAT_VISIT_FORM_", "M08_MAT_VISIT_wPERSON_")),
+                       "M06_MAT_VISIT_FORM_", "M06_MAT_VISIT_wPERSON_",
+                       "M08_MAT_VISIT_FORM_", "M08_MAT_VISIT_wPERSON_")),
          
          ENROLL_ONTIME, ENROLL_LATE, 
          ANC20_ONTIME, ANC20_LATE,
@@ -1278,16 +1279,21 @@ window_subset_df <- merged_df %>%
          M08_ENROLL_OVERDUE, M08_ANC20_OVERDUE, M08_ANC28_OVERDUE,
          M08_ANC32_OVERDUE, M08_ANC36_OVERDUE,
          
+         M08_MAT_VISIT_MNH08_1, M08_MAT_VISIT_MNH08_2, M08_MAT_VISIT_MNH08_3,
+         
          ENROLL_PASS, ANC20_PASS, ANC28_PASS, ANC32_PASS, ANC36_PASS,
          
          ENROLL_PASS_LATE, ANC20_PASS_LATE, ANC28_PASS_LATE, ANC32_PASS_LATE, ANC36_PASS_LATE,
          
+          
+         
          # GA AT VISIT:
          M04_GA_AT_VISIT_1, M04_GA_AT_VISIT_2, M04_GA_AT_VISIT_3, M04_GA_AT_VISIT_4, M04_GA_AT_VISIT_5,
          M08_GA_AT_VISIT_1,  M08_GA_AT_VISIT_2,  M08_GA_AT_VISIT_3,  M08_GA_AT_VISIT_4,  M08_GA_AT_VISIT_5,
-         GA_AT_DELIV_6)# JUST NEED ONE B/C M08 IS OPTIONAL AT DELIVERY)
+         GA_AT_DELIV_6,# JUST NEED ONE B/C M08 IS OPTIONAL AT DELIVERY
+         M04_GA_ENROLL_LT18) # This is an indicator for when GA at enroll is <=17 or not.
 
-# write.csv(window_subset_df, '../data_out/window_subset_df.csv')
+write.csv(window_subset_df, '../data_out/window_subset_df.csv')
 ```
 
 #################################################
