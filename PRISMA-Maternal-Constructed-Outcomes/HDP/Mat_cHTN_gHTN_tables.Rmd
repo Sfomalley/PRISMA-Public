@@ -54,78 +54,74 @@ df <- htn_df2
 missing_mnh08_df <- read.csv('../data_out/missing_mnh08_df_delivered_20231017.csv')
 chtn_diag_df <- read.csv('../data_out/chtn_diag_df.csv', header=TRUE)
 ```
-\newpage
-
-**Variables used for Severe Features:**
-<br>
-Proteinuria: [M08_UA_PROT_LBORRES] from MNH08 and [UA_PROT_LBORRES] from MNH19
-<br>
-Hemoglobin: [HB_POC_LBORRES and CBC_HB_LBORRES] from MNH08 at ANC32
-<br>
-Indirect bilirubin: [IBILIRUBIN_LBORRES] from MNH08 at ANC32
-<br>
-Creatinine: [CREAT_UMOLL_LBORRES] from MNH08 at ANC32 and [CREAT_LBORRESU] from MNH19
-<br>
-Platelets: [CBC_PLATE_LBORRES] from MNH08 at ANC32 and [CBC_PLATELET_LBORRES] from MNH19
-<br>
-AST: [AST_UL_LBORRES] from MNH08 at ANC32 and [AST_UL_LBORRES] from MNH19 
-<br>
-ALT: [ALT_UL_LBORRES] from MNH08 at ANC 32 and [ALT_UL_LBORRES] from MNH19
-<br>
-
-
-
 **Denominator used for analysis:**
 Enrolled women who have a completed pregnancy
 <br>
 <br>
 <br>
 
+\newpage
+
 ### Total number of BP measurements across visits
 ```{r}
+
 chtn_table <- df %>%
   rowwise() %>%
   group_by(SITE) %>%
   summarise(
-        "4 BP measurements, n (%)" =
+    "6 BP measurements, n (%)" =
+      paste0(sum(SUM_BP==6),
+             " (",
+             format(round(sum(SUM_BP==6)/n()*100, 2),nsmall=2, digits=3),
+             ")"),
+    
+    "5 BP measurements, n (%)" =
+      paste0(sum(SUM_BP==5),
+             " (",
+             format(round(sum(SUM_BP==5)/n()*100, 2),nsmall=2, digits=3),
+             ")"),
+    
+    "4 BP measurements, n (%)" =
       paste0(sum(SUM_BP==4),
              " (",
              format(round(sum(SUM_BP==4)/n()*100, 2),nsmall=2, digits=3),
              ")"),
-      
-         "3 BP measurements, n (%)" =
+    
+    "3 BP measurements, n (%)" =
       paste0(sum(SUM_BP==3),
              " (",
              format(round(sum(SUM_BP==3)/n()*100, 2),nsmall=2, digits=3),
              ")"),
-      
-         "2 BP measurements, n (%)" =
+    
+    "2 BP measurements, n (%)" =
       paste0(sum(SUM_BP==2),
              " (",
              format(round(sum(SUM_BP==2)/n()*100, 2),nsmall=2, digits=3),
              ")"),
-      
-         "1 BP measurements, n (%)" =
+    
+    "1 BP measurements, n (%)" =
       paste0(sum(SUM_BP==1),
              " (",
              format(round(sum(SUM_BP==1)/n()*100, 2),nsmall=2, digits=3),
              ")"),
-      
-         "0 BP measurements, n (%)" =
+    
+    "0 BP measurements, n (%)" =
       paste0(sum(SUM_BP==0),
              " (",
              format(round(sum(SUM_BP==0)/n()*100, 2),nsmall=2, digits=3),
              ")")) %>%
-
+  
   t() %>% as.data.frame() %>%
   `colnames<-`(c(.[1,])) %>%
   slice(-1)
 ```
 
-#### **Table 1a. Total number of BP measurements across visits until delivery (from MNH06) after the enrollment visit**
+#### **Table 1a. Total number of BP measurements across visits until delivery (from MNH06) (including the enrollment visit)**
 ```{r}
 chtn_table  %>% 
   `rownames<-` (c(
+    "6 BP measurements, n (%)",
+    "5 BP measurements, n (%)",
     "4 BP measurements, n (%)",
     "3 BP measurements, n (%)",
     "2 BP measurements, n (%)",
@@ -140,12 +136,13 @@ chtn_table  %>%
   kable_styling(font_size = 14) %>%
   row_spec(0, extra_css = "border-bottom: 0px white;") %>%
   
-  pack_rows("Blood Pressure measurements from VISIT 1-6, n (%)", 1, 5, label_row_css = "color: steelblue;")
+  pack_rows("Blood Pressure measurements from VISIT 1-6, n (%)", 1, 7, label_row_css = "color: steelblue;")
 ```
 
 \newpage
 
 ### Data missingness 
+
 ```{r}
 # JUST LOOKING AT MISSINGNESS IN MNH08 ENROLLMENT
 missing_mnh08_df2 <- missing_mnh08_df %>%   
@@ -278,7 +275,7 @@ chtn_table  %>%
               full_width = T, html_font = "Cambria", position = "left",
               latex_options = c("repeat_header", "HOLD_position")) %>% 
   
-    pack_rows("Missing MNH08 at enrollment among those who delivered and have passed their enrollment visit window", 1, 1, label_row_css = "color: steelblue;") %>%
+    pack_rows("Missing MNH08 at enrollment among those who delivered", 1, 1, label_row_css = "color: steelblue;") %>%
   pack_rows("Missing MNH08 at ANC32 among those who delivered and have passed their ANC32 visit window", 2, 2, label_row_css = "color: steelblue;") %>%
     pack_rows("Additinal missing variables among those who have delivered and have passed their ANC32 window", 3, 10, label_row_css = "color: steelblue;")
   
@@ -287,10 +284,10 @@ chtn_table  %>%
 \newpage
 
 ### Onset of hypertension prior to 20 weeks gestation:
-**Definition:** Blood pressure ≥140/90 mmHg before pregnancy or <20 weeks’ gestation and at least once >=20 weeks (2 measurements) OR
+**Definition:** at least one measure of blood pressure >=140/90 <20 weeks gestation AND a second blood pressure >=140/90 at any gestational age OR
 <br>
 
-Use of anti-hypertensive medication before pregnancy or <20 weeks gestation with a history of hypertension and one BP measurement ≥140/90 at <20 weeks' gestation or >=20 weeks' gestation OR
+"At least one measure of blood pressure >=140/90 <20 weeks gestation AND use of anti-hypertensive medication among those who were clinically diagnosed before pregnancy or <20 weeks gestation" OR
 <br>
 
 Blood pressure ≥160/110 mmHg before pregnancy or <20 weeks’ gestation once
@@ -453,23 +450,26 @@ chtn_table  %>%
               full_width = T, html_font = "Cambria", position = "left",
               latex_options = c("repeat_header", "HOLD_position")) %>% 
   
-    pack_rows("Onset of high BP <20 weeks' gestation", 1, 3, label_row_css = "color: steelblue;") %>%
-  pack_rows("Onset of high BP <20 weeks' gestation - 2 measurements", 4, 6, label_row_css = "color: steelblue;") %>%
-     pack_rows("Chronic Hypertension - clinical diagnosis", 7, 9, label_row_css = "color: steelblue;") %>%
-  pack_rows("Chronic Hypertension with treatment among those with clinical diagnosis", 10, 12, label_row_css = "color: steelblue;") %>%
-  pack_rows("Onset of high BP <20 weeks' gestation - 1 measurement + on treatment", 13, 15, label_row_css = "color: steelblue;") %>%
+    pack_rows("Onset of high BP <20 weeks' gestation (any definition)", 1, 3, label_row_css = "color: steelblue;") %>%
+  pack_rows("Onset of high BP <20 weeks' gestation - 2 BP measures", 4, 6, label_row_css = "color: steelblue;") %>%
+  pack_rows("Chronic Hypertension - clinical diagnosis", 7, 9, label_row_css = "color: steelblue;") %>%
+ pack_rows("Chronic Hypertension with treatment among those with clinical diagnosis", 10, 12, label_row_css = "color: steelblue;") %>%
+  pack_rows("Onset of high BP <20 weeks' gestation - 1 BP measurement + on treatment", 13, 15, label_row_css = "color: steelblue;") %>%
   pack_rows("Onset of severely high BP < 20 weeks gestation", 16, 18, label_row_css = "color: steelblue;")
   
 ```
 <br>
 
 ### New onset of hypertension after 20 weeks' gestation
-**Definition:** Blood pressure ≥140/90 mmHg twice ≥20 weeks gestation OR
-Use of anti-hypertensive medication ≥20 weeks' gestation and 1 BP measurement >=20 weeks gestation of BP ≥140/90 OR
+**Definition:** 
+<br>
+a) Two measures of BP >=140/90 at gestational age >=20 weeks OR 
+<br>
+b) One measure of BP >=140/90 at gestational age >=20 weeks AND use of anti-hypertensive medications >= 20 weeks OR 
+<br>
+c) One measure of BP >= 160/110 (severe hypertension)
 <br>
 
-Severely high blood pressure: BP ≥160/110 mmHg once >=20 weeks gestation 
-<br>
 
 ```{r}
 # HTN >=20 weeks
@@ -589,41 +589,26 @@ chtn_table  %>%
               full_width = T, html_font = "Cambria", position = "left",
               latex_options = c("repeat_header", "HOLD_position")) %>% 
   
-    pack_rows("Onset of high BP >=20 weeks' gestation", 1, 3, label_row_css = "color: steelblue;") %>%
-    pack_rows("Onset of high BP >=20 week's gestation - 2 measurements", 4, 6, label_row_css = "color: steelblue;") %>%
-   pack_rows("Onset of high BP >=20 week's gestation - 1 measurement + Treatment", 7, 9, label_row_css = "color: steelblue;") %>%
+    pack_rows("Onset of high BP >=20 weeks' gestation (any definition)", 1, 3, label_row_css = "color: steelblue;") %>%
+    pack_rows("Onset of high BP >=20 week's gestation - 2 BP measures", 4, 6, label_row_css = "color: steelblue;") %>%
+   pack_rows("Onset of high BP >=20 week's gestation - 1 BP measure + Treatment", 7, 9, label_row_css = "color: steelblue;") %>%
    pack_rows("Onset of severely high BP >=20 weeks' gestation", 10, 12, label_row_css = "color: steelblue;")
 
 ```
 <br>
 
-### Proteinuria and Severe Features
+### Proteinuria
 **Proteinuria at baseline:**
 <br>
 **Definition:** 
-Urine dipstick 1+ or 2+ at baseline
+Urine dipstick 1+ or 2+ at enrollment <20 weeks
 <br>
 
 **Gestational proteinuria:**
 **Definition:** 
-Urine dipstick 1+ or 2+ >=20 weeks' gestation or IPC among those who did not have baseline proteinuria and those without severe features)
+Urine dipstick 1+ or 2+ >=20 weeks' gestation or IPC among those who did not have baseline proteinuria
 <br>
 
-**Severe features of PE**
-**Definition:** 
-<br>
-BP≥160/100 mmHg OR
-<br>
-Hemolysis (severe anemia (hemoglobin <7g/dL) + bilirubin ≥20.52 &micro;mol/L) OR 
-<br>
-Creatinine >97.25 &micro;mol/dL OR 
-<br>
-AST ≥90 units/L OR 
-<br>
-ALT ≥120 units/L OR 
-<br>
-Platelets <100X10^3^ /mm^3^
-<br>
 
 
 ```{r}
@@ -664,9 +649,75 @@ chtn_table <- df %>%
       paste0(sum(is.na(PROTEINURIA_ANC_IPC)),
              " (",
              format(round(sum(is.na(PROTEINURIA_ANC_IPC))/n()*100,2), nsmall=2, digits=3),
-             ")"),
+             ")"))  %>%
+  
+  t() %>% as.data.frame() %>%
+  `colnames<-`(c(.[1,])) %>%
+  slice(-1)
+
+
+```
+
+#### **Table 2c. Proteinuria**
+```{r}
+chtn_table  %>% 
+  `rownames<-` (c(
+    "Baseline = Yes ",
+    "Baseline = No ",
+    "Baseline = Missing ",
     
+    "Gestational = Yes ",
+    "Gestational = No ",
+    "Gestational = Missing ")) %>% 
     
+     mutate_all(funs(str_replace(., "NaN", "0"))) %>% 
+  kbl(caption = "", booktabs = TRUE) %>%
+  kable_paper(bootstrap_options = "striped", 
+              full_width = T, html_font = "Cambria", position = "left",
+              latex_options = c("repeat_header", "HOLD_position")) %>% 
+  
+    pack_rows("Baseline Proteinuria (gestational age <20 weeks)", 1, 3, label_row_css = "color: steelblue;") %>%
+  pack_rows("Gestational Proteinuria (gestational age >=20 weeks among those without baseline proteinuria)", 4, 6, label_row_css = "color: steelblue;") 
+```
+
+### Severe features of PE
+**Definition:** 
+<br>
+BP≥160/100 mmHg OR
+<br>
+Hemolysis (severe anemia (hemoglobin <7g/dL) + bilirubin ≥20.52 &micro;mol/L) OR 
+<br>
+Creatinine >97.25 &micro;mol/dL OR 
+<br>
+AST ≥90 units/L OR 
+<br>
+ALT ≥120 units/L OR 
+<br>
+Platelets <100X10^3^ /mm^3^
+<br>
+
+**Variables used for Severe Features:**
+<br>
+Proteinuria: [M08_UA_PROT_LBORRES] from MNH08 and [UA_PROT_LBORRES] from MNH19
+<br>
+Hemoglobin: [HB_POC_LBORRES and CBC_HB_LBORRES] from MNH08 at ANC32
+<br>
+Indirect bilirubin: [IBILIRUBIN_LBORRES] from MNH08 at ANC32
+<br>
+Creatinine: [CREAT_UMOLL_LBORRES] from MNH08 at ANC32 and [CREAT_LBORRESU] from MNH19
+<br>
+Platelets: [CBC_PLATE_LBORRES] from MNH08 at ANC32 and [CBC_PLATELET_LBORRES] from MNH19
+<br>
+AST: [AST_UL_LBORRES] from MNH08 at ANC32 and [AST_UL_LBORRES] from MNH19 
+<br>
+ALT: [ALT_UL_LBORRES] from MNH08 at ANC 32 and [ALT_UL_LBORRES] from MNH19
+<br>
+
+```{r}
+chtn_table <- df %>%
+  rowwise() %>%
+  group_by(SITE) %>%
+  summarise(
     # SEVERE FEATURES
             "Severe features = Yes " =
       paste0(sum(MAT_PE_SEV_MEAS == 1, na.rm = TRUE),
@@ -682,6 +733,126 @@ chtn_table <- df %>%
       paste0(sum(is.na(MAT_PE_SEV_MEAS)),
              " (",
              format(round(sum(is.na(MAT_PE_SEV_MEAS))/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    
+    # CATEGORY: SEVERE HTN
+       "High BP>=160/110 = Yes " =
+      paste0(sum(SEVERE_HTN == 1, na.rm = TRUE),
+             " (",
+             format(round(sum(SEVERE_HTN == 1, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+        "High BP>=160/110 = No " =
+      paste0(sum(SEVERE_HTN == 0, na.rm = TRUE),
+             " (",
+             format(round(sum(SEVERE_HTN == 0, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    "High BP>=160/110 = Missing " =
+      paste0(sum(is.na(SEVERE_HTN)),
+             " (",
+             format(round(sum(is.na(SEVERE_HTN))/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    
+    # ANEMIA
+    
+       "Severe anemia = Yes " =
+      paste0(sum(ANEMIA == 1, na.rm = TRUE),
+             " (",
+             format(round(sum(ANEMIA == 1, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+        "Severe anemia = No " =
+      paste0(sum(ANEMIA == 0, na.rm = TRUE),
+             " (",
+             format(round(sum(ANEMIA == 0, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    "Severe anemia = Missing " =
+      paste0(sum(is.na(ANEMIA)),
+             " (",
+             format(round(sum(is.na(ANEMIA))/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    
+    # BILIRUBIN
+    "High bilirubin = Yes"= 
+      paste0(sum(BILIRUBIN == 1, na.rm = TRUE),
+             " (",
+             format(round(sum(BILIRUBIN == 1, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+        "High bilirubin = No " =
+      paste0(sum(BILIRUBIN == 0, na.rm = TRUE),
+             " (",
+             format(round(sum(BILIRUBIN == 0, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    "High bilirubin = Missing " =
+      paste0(sum(is.na(BILIRUBIN)),
+             " (",
+             format(round(sum(is.na(BILIRUBIN))/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    
+    # AST
+     "High AST = Yes"= 
+      paste0(sum(AST == 1, na.rm = TRUE),
+             " (",
+             format(round(sum(AST == 1, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+        "High AST = No " =
+      paste0(sum(AST == 0, na.rm = TRUE),
+             " (",
+             format(round(sum(AST == 0, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    "High AST = Missing " =
+      paste0(sum(is.na(AST)),
+             " (",
+             format(round(sum(is.na(AST))/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    
+    # ALT
+     "High ALT = Yes"= 
+      paste0(sum(ALT == 1, na.rm = TRUE),
+             " (",
+             format(round(sum(ALT == 1, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+        "High ALT = No " =
+      paste0(sum(ALT == 0, na.rm = TRUE),
+             " (",
+             format(round(sum(ALT == 0, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    "High ALT = Missing " =
+      paste0(sum(is.na(ALT)),
+             " (",
+             format(round(sum(is.na(ALT))/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    
+    # PLATELETS
+     "Low Platelets = Yes" = 
+      paste0(sum(PLATELETS == 1, na.rm = TRUE),
+             " (",
+             format(round(sum(PLATELETS == 1, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+        "Low Platelets = No " =
+      paste0(sum(PLATELETS == 0, na.rm = TRUE),
+             " (",
+             format(round(sum(PLATELETS == 0, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    "Low Platelets = Missing " =
+      paste0(sum(is.na(PLATELETS)),
+             " (",
+             format(round(sum(is.na(PLATELETS))/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    
+    # CREATININE
+    "High Creatinine = Yes" = 
+      paste0(sum(CREATININE == 1, na.rm = TRUE),
+             " (",
+             format(round(sum(CREATININE == 1, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+        "High Creatinine = No " =
+      paste0(sum(CREATININE == 0, na.rm = TRUE),
+             " (",
+             format(round(sum(CREATININE == 0, na.rm = TRUE)/n()*100,2), nsmall=2, digits=3),
+             ")"),
+    "High Creatinine = Missing " =
+      paste0(sum(is.na(CREATININE)),
+             " (",
+             format(round(sum(is.na(CREATININE))/n()*100,2), nsmall=2, digits=3),
              ")")) %>%
   
   t() %>% as.data.frame() %>%
@@ -690,21 +861,41 @@ chtn_table <- df %>%
     
 ```
 
-#### **Table 2c. Proteinuria and Severe Features**
+#### **Table 2d. Severe features and components**
 ```{r}
 chtn_table  %>% 
   `rownames<-` (c(
-    "Baseline = Yes ",
-    "Baseline = No ",
-    "Baseline = Missing ",
-    
-    "Gestational = Yes ",
-    "Gestational = No ",
-    "Gestational = Missing ",
-    
     "Severe features = Yes ",
     "Severe features = No ",
-    "Severe features = Missing ")) %>% 
+    "Severe features = Missing ",
+    
+    "High BP>=160/110 = Yes ",
+    "High BP>=160/110 = No ",
+    "High BP>=160/110 = Missing ",
+    
+    "Severe anemia = Yes",
+    "Severe anemia = No",
+    "Severe anemia = Missing",
+    
+    "High bilirubin = Yes",
+    "High bilirubin = No", 
+    "High bilirubin = Missing",
+    
+    "High AST = Yes",
+    "High AST = No",
+    "High AST = Missing",
+    
+    "High ALT = Yes",
+    "High ALT = No",
+    "High ALT = Missing",
+    
+    "Low Platelets = Yes",
+    "Low Platelets = No",
+    "Low Platelets = Missing",
+    
+    "High Creatinine = Yes",
+    "High Creatinine = No",
+    "High Creatinine = Missing")) %>% 
     
      mutate_all(funs(str_replace(., "NaN", "0"))) %>% 
   kbl(caption = "", booktabs = TRUE) %>%
@@ -712,12 +903,18 @@ chtn_table  %>%
               full_width = T, html_font = "Cambria", position = "left",
               latex_options = c("repeat_header", "HOLD_position")) %>% 
   
-    pack_rows("Baseline Proteinuria (gestational age <20 weeks)", 1, 3, label_row_css = "color: steelblue;") %>%
-  pack_rows("Gestational Proteinuria (gestational age >=20 weeks among those without baseline proteinuria)", 4, 6, label_row_css = "color: steelblue;") %>%
-  pack_rows("Severe Features", 7, 9, label_row_css = "color: steelblue;")
+  pack_rows("Severe Features", 1, 3, label_row_css = "color: steelblue;") %>%
+  pack_rows("Severely high BP >=20 weeks gestation", 4, 6, label_row_css = "color: steelblue;") %>%
+  pack_rows("Severe anemia (Hb <7g/dl)", 7,9, label_row_css = "color: steelblue;") %>%
+  pack_rows("Bilirubin >=20.52", 10, 12, label_row_css = "color: steelblue;") %>%
+  pack_rows("AST >=90", 13, 15, label_row_css = "color: steelblue;") %>%
+  pack_rows("ALT >=120", 16, 18, label_row_css = "color: steelblue;") %>%
+  pack_rows("Platelets <100,000", 19, 21, label_row_css = "color: steelblue;") %>%
+  pack_rows("Creatinine >97.26", 22, 24, label_row_css = "color: steelblue;") 
 
 ```
 <br>
+\newpage
 
 ### Hypertensive Disorders of Pregnancy 
 **Getational hypertension**

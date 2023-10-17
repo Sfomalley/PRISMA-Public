@@ -481,17 +481,22 @@ htn_df <- htn_df %>%
                                         CHRON_HYPER_MEAS_ANY2)) %>%
  
    # Summing up after enrollment visit - doesn't include ANC_LT20
-  mutate(SUM_BP = sum(#!is.na(meanSBP_ANC_LT20), 
+  mutate(SUM_BP = sum(!is.na(meanSBP_ANC_LT20), 
                       !is.na(meanSBP_ANC20), 
                       !is.na(meanSBP_ANC28), 
                       !is.na(meanSBP_ANC32), 
                       !is.na(meanSBP_ANC36),
-                      !is.na(meanSBP_IPC),
-                      !is.na(meanSBP_Hosp_ANC))) # THIS SUM_BP LOOKS GOOD.
+                      !is.na(meanSBP_IPC))) # THIS SUM_BP LOOKS GOOD.
+                      #!is.na(meanSBP_Hosp_ANC)
 
 table(htn_df$CHRON_HYPER_MEAS_ANY2, htn_df$SITE, useNA = "always")
 round(prop.table(table(htn_df$CHRON_HYPER_MEAS_ANY2, htn_df$SITE, useNA = "always"), margin=2)*100,2)
 
+
+temp.df <- htn_df %>% select(MOMID, SITE, SUM_BP, meanSBP_ANC_LT20, meanSBP_ANC20,
+                             meanSBP_ANC28, meanSBP_ANC32,
+                            meanSBP_ANC36, meanSBP_IPC)
+  
 temp.df <- htn_df %>% select(MOMID, SITE, SUM_BP, M06_BP_SYS_VSORRES_1_4, M06_BP_SYS_VSORRES_2_4, M06_BP_SYS_VSORRES_3_4,
                              M06_BP_SYS_VSORRES_1_5, M06_BP_SYS_VSORRES_2_5, M06_BP_SYS_VSORRES_3_5,
                             meanSBP_ANC36, meanSBP_IPC) %>%
@@ -1063,6 +1068,79 @@ round(prop.table(table(MAT_PE_SEV_MEAS = htn_df$MAT_PE_SEV_MEAS, SITE = htn_df$S
                                          
 ```
 
+# INDIVIDUALS VARIABLES FOR SEVERE FEATURES
+```{r}
+# M08_AST_UL_LBORRES_4 >= 90 | M08_ALT_UL_LBORRES_4 >= 120
+# M19_AST_UL_LBORRES_13 >=90 | M19_ALT_UL_LBORRES_13 >=120
+# MAT_ANEMIA_MEAS4 == "severe" & M08_IBILIRUBIN_LBORRES_4 >=20.52
+
+# SEVERE HTN AFTER 20 WEEKS GA:
+# SEVERE_GT20_HTN_MEAS
+htn_df <- htn_df %>% 
+  mutate(SEVERE_HTN = case_when((SEVERE_GT20_HTN_MEAS==1) ~ 1,
+                         is.na(SEVERE_GT20_HTN_MEAS)~ as.numeric(NA),
+                         TRUE ~ 0))
+
+temp.df <- htn_df %>% 
+  select(MOMID, SITE, SEVERE_HTN, SEVERE_GT20_HTN_MEAS)
+
+# ANEMIA
+htn_df <- htn_df %>% 
+  mutate(ANEMIA = case_when((MAT_ANEMIA_MEAS4=="severe") ~ 1,
+                         is.na(MAT_ANEMIA_MEAS4)~ as.numeric(NA),
+                         TRUE ~ 0))
+
+temp.df <- htn_df %>% 
+  select(MOMID, SITE, MAT_ANEMIA_MEAS4, ANEMIA)
+
+# Billirubin
+htn_df <- htn_df %>% 
+  mutate(BILIRUBIN = case_when((M08_IBILIRUBIN_LBORRES_4 >=20.52) ~ 1,
+                         is.na(M08_IBILIRUBIN_LBORRES_4)~ as.numeric(NA),
+                         TRUE ~ 0))
+
+temp.df <- htn_df %>% 
+  select(MOMID, SITE, M08_IBILIRUBIN_LBORRES_4, BILIRUBIN)
+
+
+# AST
+htn_df <- htn_df %>% 
+  mutate(AST = case_when((M08_AST_UL_LBORRES_4 >= 90 | M19_AST_UL_LBORRES_13 >=90) ~ 1,
+                         (is.na(M08_AST_UL_LBORRES_4) & is.na(M19_AST_UL_LBORRES_13 >=90))~ as.numeric(NA),
+                         TRUE ~ 0))
+
+temp.df <- htn_df %>% 
+  select(MOMID, SITE, M08_AST_UL_LBORRES_4, M19_AST_UL_LBORRES_13, AST)
+
+# ALT
+htn_df <- htn_df %>% 
+  mutate(ALT = case_when((M08_ALT_UL_LBORRES_4 >= 120 | M19_ALT_UL_LBORRES_13 >=120) ~ 1,
+                         is.na(M08_ALT_UL_LBORRES_4) & is.na(M19_ALT_UL_LBORRES_13) ~ as.numeric(NA),
+                         TRUE ~ 0))
+
+# PLATELETS:
+# (M08_CBC_PLATE_LBORRES_4 >=0 & M08_CBC_PLATE_LBORRES_4 < 100)
+htn_df <- htn_df %>% 
+  mutate(PLATELETS = case_when(((M08_CBC_PLATE_LBORRES_4 >=0 & M08_CBC_PLATE_LBORRES_4 < 100) | 
+                                 (M19_CBC_PLATELET_LBORRES_13>=0 & M19_CBC_PLATELET_LBORRES_13 < 100)) ~ 1,
+                         (is.na(M08_CBC_PLATE_LBORRES_4) & is.na(M19_CBC_PLATELET_LBORRES_13)) ~ as.numeric(NA),
+                         TRUE ~ 0))
+
+temp.df <- htn_df %>% 
+  select(MOMID, SITE, PLATELETS, M08_CBC_PLATE_LBORRES_4, M19_CBC_PLATELET_LBORRES_13)
+
+# CREATININE 
+#  M08_CREAT_UMOLL_LBORRES_4 > 97.26 |  M19_CREAT_LBORRESU_13 >97.26)
+htn_df <- htn_df %>% 
+  mutate(CREATININE = case_when((M08_CREAT_UMOLL_LBORRES_4 > 97.26 | M19_CREAT_LBORRESU_13 >97.26) ~ 1,
+                         (is.na(M08_CREAT_UMOLL_LBORRES_4) & is.na(M19_CREAT_LBORRESU_13)) ~ as.numeric(NA),
+                         TRUE ~ 0))
+
+temp.df <- htn_df %>% 
+  select(MOMID, SITE, CREATININE, M08_CREAT_UMOLL_LBORRES_4,  M19_CREAT_LBORRESU_13)
+
+```
+
 ###############################
 # BASELINE PROTEINURIA - LOOKS GOOD!
 # I looked at both visit 1 and 2 but as long as they were <20 weeks testing.
@@ -1101,7 +1179,7 @@ And those who don't have proteinuria at baseline.  If baseline missing, it's inc
 # is.na(M08_GA_AT_VISIT_2) ~ as.numeric(NA), - I could put this code inside case_when() and it would give me NA when GA at visit2 is NA but i've decided not to do this b/c by the time she has her 4th ANC visit, her GA will def. be greater than 20 weeks and if she has a proteinuria result, she has gestational proteinuria.
 
 htn_df <- htn_df %>% 
-  mutate(PROTEINURIA_ANC_IPC = case_when((M08_GA_AT_VISIT_2/7>=20 | is.na(M08_GA_AT_VISIT_2)) & MAT_PE_SEV_MEAS==0 &
+  mutate(PROTEINURIA_ANC_IPC = case_when((M08_GA_AT_VISIT_2/7>=20 | is.na(M08_GA_AT_VISIT_2)) &
                                            (any(c(M08_UA_PROT_LBORRES_2, M08_UA_PROT_LBORRES_3, 
                                                   M08_UA_PROT_LBORRES_4, M08_UA_PROT_LBORRES_5, 
                                                   M08_UA_PROT_LBORRES_6, 
