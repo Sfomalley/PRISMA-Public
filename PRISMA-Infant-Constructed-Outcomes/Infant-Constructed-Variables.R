@@ -15,7 +15,13 @@
 #each form with additional variables that will be used for multiple outcomes. For example, mnh01_constructed 
 #is a dataset taht will be used for several outcomes. 
 
-# UPDATE LINES 35, 38, and 41 EACH RUN
+# The `growthstandards` R package allows the user to pull INTERGROWTH centiles for 
+  # newborn length, weight, and head circumference. 
+  # R Package linked: (https://ki-tools.github.io/growthstandards/articles/usage.html#intergrowth-newborn-standard-1).
+                                                                                                                                                                                                                                 
+# the package can be downloaded using the following code: 
+    # install.packages("remotes") # if "remotes" is not already installed
+    # remotes::install_github("ki-tools/growthstandards")
 #*****************************************************************************
 #*****************************************************************************
 #* Data Setup 
