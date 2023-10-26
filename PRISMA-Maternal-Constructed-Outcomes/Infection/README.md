@@ -3,12 +3,11 @@
 
 ## Description
 
-This folder two coding files that generate PRISMA maternal infection outcomes and an
-accompanying report. This file is an ongoing document that will be
+This folder two coding files that generate PRISMA maternal infection outcomes and an accompanying report. This file is an ongoing document that will be
 updated as more outcomes are coded and generated. More information on
 the outcomes coded here can be found in the PRISMA protocol.
 
-#### :pushpin: Updated on 10 October 2023
+#### :pushpin: Updated on 25 October 2023
 
 #### :pushpin: Originally drafted by:
 
