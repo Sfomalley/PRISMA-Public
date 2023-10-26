@@ -1,5 +1,5 @@
 ---
-title: "<span style='font-size: 18px'> <span style='text-align: center'> PRISMA-Infant-Outcomes (Issued: 2023-10-10)"
+title: "<span style='font-size: 18px'> <span style='text-align: center'> PRISMA-Infant-Outcomes (Issued: 2023-10-25)"
 output:
   html_document:
     df_print: paged
@@ -29,12 +29,7 @@ knit: (function(inputFile, encoding) {
 &nbsp;
 
 
-##### **Includes data from synapse last updated:** {.unlisted .unnumbered}
-##### Kenya : 2023-10-06 {.unlisted .unnumbered}
-##### Pakistan : 2023-10-06 {.unlisted .unnumbered}
-##### Ghana : NA (no 2023-10-06 upload) {.unlisted .unnumbered}
-##### Zambia : 2023-10-06 {.unlisted .unnumbered}
-##### India-CMC : 2023-10-06 {.unlisted .unnumbered}
+##### **Includes data from synapse last updated:** 2023-10-13 {.unlisted .unnumbered}
 
 ```{css, echo=FALSE}
 .table caption {
@@ -51,7 +46,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 #*****************************************************************************
 #* PRISMA Infant Outcomes -- TABLES 
 #* Drafted: 21 September 2023, Stacie Loisate
-#* Last updated: 17 April 2023
+#* Last updated: 25 October 2023
 #*****************************************************************************
 library(knitr)
 library(tidyverse)
@@ -61,8 +56,6 @@ library(kableExtra)
 library(emo)
 library(naniar)
 library(RColorBrewer)
-
-UploadDate <- "2023-09-29"
 
 path_to_data <- "D:/Users/stacie.loisate/Box/PRISMA-Analysis/Infant-Constructed-Variables/data/"
 path_to_save <- "D:/Users/stacie.loisate/Box/PRISMA-Analysis/Infant-Constructed-Variables/output/"
@@ -225,8 +218,9 @@ lowbirthweight_tab  %>%
   kable_paper(bootstrap_options = "striped", 
               full_width = T, html_font = "Cambria", position = "left",
               latex_options = c("repeat_header", "HOLD_position")) %>% 
-  kable_styling(font_size = 14) %>%
+  kable_styling(font_size = 13) %>%
   row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
+  pack_rows("Data Completeness", 1, 4, label_row_css = "color: steelblue;") %>% 
   pack_rows("PRISMA measured birthweight (categorical), n (%)", 5, 8, label_row_css = "color: steelblue;") %>% 
   pack_rows("Any method measured birthweight (categorical), n (%)", 9, 12, label_row_css = "color: steelblue;") 
 
@@ -257,7 +251,10 @@ ggplot(data=lowbirthweight_nomissing,
 
   
 ```
-*Figure 1a. Distribution of birthweights across sites. Where PRISMA measurement was not available or if the PRISMA measurement was taken >72 hours following birth, the Facility reported birthweight was used. Dashed lines represent 1500g and 2500g reference points. 
+<span style="font-size: 88%;">
+* Figure 1a. Distribution of birthweights across sites. Where PRISMA measurement was not available or if the PRISMA measurement was taken >72 hours following birth, the Facility reported birthweight was used. Dashed lines represent 1500g and 2500g reference points. 
+</span>
+
 
 
 \newpage
@@ -284,7 +281,9 @@ ggplot(data=lowbirthweight,
   geom_vline(mapping=aes(xintercept=72), linetype ="dashed", color = "red")
   
 ```
-*Figure 1b. Hours following birth weight measurement recorded by PRISMA-trained staff (or Facility reported where PRISMA measurement not available). Report of "0" indicates the measurement was taken <1hr following birth. Dashed lines represent 24, 48, and 72 hour time points. 
+<span style="font-size: 88%;">
+* Figure 1b. Hours following birth weight measurement recorded by PRISMA-trained staff (or Facility reported where PRISMA measurement not available). Report of "0" indicates the measurement was taken <1hr following birth. Dashed lines represent 24, 48, and 72 hour time points. 
+</span>
 
 \newpage
 
@@ -369,8 +368,6 @@ mnh01_tab <- mnh01_constructed %>%
   `colnames<-`(c(.[1,])) %>% 
   slice(-1) 
 
-
-    
   
 preterm_birth_live_tab <- preterm_birth %>% 
   filter(LIVEBIRTH == 1) %>% 
@@ -479,14 +476,14 @@ bind_rows(mnh01_tab, preterm_birth_live_tab, preterm_birth_tab) %>%
     "Late preterm (34 to <37 weeks)",
     "Early preterm (32 to <34 weeks)",
     "Very preterm (28 to <32 weeks)",
-    "Extermely preterm (<28 weeks)",
+    "Extremely preterm (<28 weeks)",
     "Missing",
 
     "Term (>= 37 weeks) ",
     "Late preterm (34 to <37 weeks) ",
     "Early preterm (32 to <34 weeks) ",
     "Very preterm (28 to <32 weeks) ",
-    "Extermely preterm (<28 weeks) ",
+    "Extremely preterm (<28 weeks) ",
     "Missing "
 
   )
@@ -497,9 +494,9 @@ bind_rows(mnh01_tab, preterm_birth_live_tab, preterm_birth_tab) %>%
   kable_paper(bootstrap_options = "striped", 
               full_width = T, html_font = "Cambria", position = "left",
               latex_options = c("repeat_header", "HOLD_position")) %>% 
-  kable_styling(font_size = 16) %>%
+  kable_styling(font_size = 13) %>%
   row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
-  pack_rows("MNH01 GA Data", 1, 3, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Data Completeness [MNH01]", 1, 3, label_row_css = "color: steelblue;") %>% 
   pack_rows("Preterm birth severity (among livebirths) (categorical), n (%)", 4, 9, label_row_css = "color: steelblue;") %>% 
   pack_rows("Preterm delivery severity (among livebirths & stillbirths) (categorical), n (%)", 10, 15, label_row_css = "color: steelblue;") 
 
@@ -519,8 +516,8 @@ ggplot(data=mnh01_constructed,
        aes(x=abs(GA_DIFF_DAYS))) + 
   geom_histogram() + #binwidth = 100
   facet_grid(vars(SITE), scales = "free") +
-  scale_x_continuous(breaks = seq(0,175,25), 
-                     limits = c(0,175)) + 
+  # scale_x_continuous(breaks = seq(0,175,25), 
+  #                    limits = c(0,175)) + 
   ggtitle("Days difference between GA by US and GA by LMP, by Site") + 
   ylab("Count") + 
   xlab("Days difference") + 
@@ -544,7 +541,9 @@ ggplot(data=mnh01_constructed,
         panel.grid.minor = element_blank()) 
 
 ```
-*Figure 2a. Pakistan is not reporting LMP for any participant, which is why they have no data above.  
+<span style="font-size: 88%;">
+* Figure 2a. Pakistan is not reporting LMP for any participant, which is why they have no data above.  
+</span>
 
 \newpage
 
@@ -568,7 +567,9 @@ ggplot(data=preterm_birth,
         panel.grid.minor = element_blank())
   
 ```
-*Figure 2b. Gestational age at birth was calculated by taking the difference between the DOB and "estimated conception date" determined by BOE.  
+<span style="font-size: 88%;">
+* Figure 2b. Gestational age at birth was calculated by taking the difference between the DOB and "estimated conception date" determined by BOE.  
+</span>
 
 \newpage
 
@@ -634,7 +635,7 @@ sga_tab <- sga %>%
       format(round(sum(SGA_CAT == 11, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
       ")"),
 
-    "SGA <10th percentile" = paste0(
+    "SGA 3rd to <10th percentile" = paste0(
       format(sum(SGA_CAT == 12), nsmall = 0, digits = 2),
       " (",
       format(round(sum(SGA_CAT == 12, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
@@ -668,7 +669,7 @@ sga_tab <- sga %>%
 sga_tab %>% 
   `rownames<-` (c(
     "SGA <3rd percentile",
-    "SGA <10th percentile",
+    "SGA 3rd to <10th percentile",
     "AGA 10th to <90th percentile",
     "LGA >= 90th percentile",
     "Missing"
@@ -680,13 +681,12 @@ sga_tab %>%
   kable_paper(bootstrap_options = "striped", 
               full_width = T, html_font = "Cambria", position = "left",
               latex_options = c("repeat_header", "HOLD_position")) %>% 
-  kable_styling(font_size = 16) %>%
+  kable_styling(font_size = 13) %>%
   row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
   pack_rows("Size for Gestational Age (Cateogorical), n (%)", 1, 5, label_row_css = "color: steelblue;")  
 
 
 ```
-
 
 \newpage
 
@@ -770,20 +770,7 @@ mortality_tab <- mortality %>% ## denominator is anyone with an MNH09 or MNH11 f
       format(sum(MISSING_MNH11 == 1), nsmall = 0, digits = 2),
       " (",
       format(round(sum(MISSING_MNH11 == 1, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
-      ")"),
-    
-    "MNH24 Closeout MOMIDs missing from MNH02 (enrollment)" = paste0(
-      format(sum(ID_MISSING_ENROLLMENT == 1), nsmall = 0, digits = 2),
-      " (",
-      format(round(sum(ID_MISSING_ENROLLMENT == 1, na.rm = TRUE)/n()*100, 2), nsmall = 0, digits = 2),
-      ")"), 
-    
-    "Death reported but missing time of death^a^" = paste0(
-      format(sum(DTH_TIME_MISSING == 1), nsmall = 0, digits = 2),
-      " (",
-      format(round(sum(DTH_TIME_MISSING == 1, na.rm = TRUE)/sum(DTH_INDICATOR == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
-      ")"),
-
+      ")")
 
   ) %>% 
   t() %>% as.data.frame() %>% 
@@ -797,19 +784,19 @@ neo_mortality_tab <- neonatal_mortality %>% ## denominator is all live births wi
     "Denominator " = paste0(
       format(sum(DENOM_28d == 1, na.rm = TRUE), nsmall = 0, digits = 2)),
 
-    "Death <24 hours of life" = paste0(
+    "Death <24 hrs of life" = paste0(
       format(sum(NEO_DTH_CAT == 11), nsmall = 0, digits = 2),
       " (",
       format(round(sum(NEO_DTH_CAT == 11, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")"),
     
-    "Death <7 days of life" = paste0(
+    "Death 24 hrs to <7 days of life" = paste0(
       format(sum(NEO_DTH_CAT == 12), nsmall = 0, digits = 2),
       " (",
       format(round(sum(NEO_DTH_CAT == 12, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")"),
     
-    "Death <28 days of life" = paste0(
+    "Death 7 days to <28 days of life" = paste0(
       format(sum(NEO_DTH_CAT == 13), nsmall = 0, digits = 2),
       " (",
       format(round(sum(NEO_DTH_CAT == 13, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
@@ -822,9 +809,9 @@ neo_mortality_tab <- neonatal_mortality %>% ## denominator is all live births wi
       ")"),
     
     "Total neonatal deaths " = paste0(
-      format(sum(DTH_28D == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      format(sum(TOTAL_NEO_DEATHS == 1, na.rm = TRUE), nsmall = 0, digits = 2),
       " (",
-      format(round(sum(DTH_28D == 1, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      format(round(sum(TOTAL_NEO_DEATHS == 1, na.rm = TRUE)/sum(DENOM_28d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")")
 
 
@@ -856,9 +843,9 @@ inf_mortality_tab <- infant_mortality %>% ## denominator is all live births with
 
     
     "Total infant deaths  " = paste0(
-      format(sum(INF_DTH_CAT == 14, na.rm = TRUE), nsmall = 0, digits = 2),
+      format(sum(TOTAL_INF_DEATHS == 1, na.rm = TRUE), nsmall = 0, digits = 2),
       " (",
-      format(round(sum(INF_DTH_CAT == 14, na.rm = TRUE)/sum(DENOM_365d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      format(round(sum(TOTAL_INF_DEATHS == 1, na.rm = TRUE)/sum(DENOM_365d == 1 , na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")")
 
   ) %>% 
@@ -874,20 +861,22 @@ bind_rows(mortality_tab, neo_mortality_tab, inf_mortality_tab)  %>%
   kable_paper(bootstrap_options = "striped", 
               full_width = T, html_font = "Cambria", position = "left",
               latex_options = c("repeat_header", "HOLD_position")) %>% 
-  kable_styling(font_size = 14) %>%
+  kable_styling(font_size = 13) %>%
   row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
-  row_spec(c(5,11), bold = TRUE) %>% 
-  pack_rows("Data Issues", 1, 4, label_row_css = "color: steelblue;") %>% 
-  pack_rows("Timing of Neonatal Mortality^b^", 5, 10, label_row_css = "color: steelblue;") %>% 
-  pack_rows("Timing of Infant Mortality^c^", 11,14, label_row_css = "color: steelblue;")  
+  row_spec(c(3,9), bold = TRUE) %>% 
+  pack_rows("Data Completeness", 1, 2, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Timing of Neonatal Mortality^b^", 3, 8, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Timing of Infant Mortality^c^", 9, 12, label_row_css = "color: steelblue;")  
 
 ```
+<span style="font-size: 88%;">
 ^a^ Denominator is all live births with a reported death in MNH24.
 <br>
 ^b^ Denominator is all live births with MNH09 and MNH11 filled out AND have passed the risk period OR died within the risk period (risk period: age = 28days).
 <br>
 ^c^ Denominator is all live births with MNH09 and MNH11 filled out AND have passed the risk period OR died within the risk period (risk period: age = 365days). 
 <br>
+</span>
 
 \newpage
 ### Stillbirth
@@ -927,22 +916,10 @@ stillbirth_tab <- stillbirth %>% ## denominator is anyone with a birth outcome r
   group_by(SITE) %>% 
   summarise(
 
-    "Fetal loss reported in MNH04 but missing MNH09^a^" = paste0(
-      format(sum(MISSING_MNH09 == 1, na.rm = TRUE), nsmall = 0, digits = 2),
-      " (",
-      format(round(sum(MISSING_MNH09 == 1, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
-      ")"),
-    
     "Fetal loss or fetal death reported but missing signs of life (NA or 77 reported)^b^" = paste0(
       format(sum(MISSING_SIGNS_OF_LIFE == 1, na.rm = TRUE), nsmall = 0, digits = 2),
       " (",
       format(round(sum(MISSING_SIGNS_OF_LIFE == 1, na.rm = TRUE)/sum(BIRTH_OUTCOME == 0, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
-      ")"),
-    
-    "GA at delivery <20 weeks^a^" = paste0(
-      format(sum(GESTAGE_UNDER20 == 1, na.rm = TRUE), nsmall = 0, digits = 2),
-      " (",
-      format(round(sum(GESTAGE_UNDER20 == 1, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")"),
     
     "Early Stillbirth: Death prior to delivery at 20 to 27 weeks gestatation" = paste0(
@@ -1009,19 +986,18 @@ stillbirth_tab %>%
               latex_options = c("repeat_header", "HOLD_position")) %>% 
   kable_styling(font_size = 13) %>%
   row_spec(0, extra_css = "border-bottom: 0px white;") %>% 
-  #row_spec(c(1,3,9), bold = TRUE) %>% 
-  pack_rows("Data Issues", 1, 3, label_row_css = "color: steelblue;") %>% 
-  pack_rows("Stillbirth (Categorical)^a^", 4, 8, label_row_css = "color: steelblue;") %>% 
-  pack_rows("Timing of Stillbirth^b^", 9,11, label_row_css = "color: steelblue;")  
+  pack_rows("Data Completeness", 1, 1, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Stillbirth (Categorical)^a^", 2, 6, label_row_css = "color: steelblue;") %>% 
+  pack_rows("Timing of Stillbirth^b^", 7 ,9, label_row_css = "color: steelblue;")  
 
 
 ```
+<span style="font-size: 88%;">
 ^a^ Denominator is all participants with a birth outcome (`INF_DSTERM=1 or 0 [MNH11]` OR `PRG_DSDECOD=2 or 3 [MNH04]`). 
 <br>
 ^b^ Denominator is all reported stillbirths. 
 <br>
-
-
+</span>
 
 
 
