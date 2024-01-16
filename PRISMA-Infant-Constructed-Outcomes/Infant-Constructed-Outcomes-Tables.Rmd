@@ -904,7 +904,7 @@ preterm_output <- tb_theme1(preterm_tab) %>%
     title = md("**Table 3**")
   ) %>%
   tab_row_group(
-    label = html("<span style='font-size: 18px'>Data Completeness [MNH01]</span>"),
+    label = html("<span style='font-size: 18px'>Data Completeness [MNH01] (among all enrolled)</span>"),
     rows = 1:3
   ) %>%
   tab_row_group(
@@ -913,9 +913,9 @@ preterm_output <- tb_theme1(preterm_tab) %>%
   ) %>%
   tab_row_group(
     label = html("<span style='font-size: 18px'>Preterm delivery severity (live & stillbirths) (categorical), n (%)</span>"),
-    rows = 11:16
+    rows = 11:17
   ) %>%
-  row_group_order(groups = c("<span style='font-size: 18px'>Data Completeness [MNH01]</span>",
+  row_group_order(groups = c("<span style='font-size: 18px'>Data Completeness [MNH01] (among all enrolled)</span>",
                   "<span style='font-size: 18px'>Preterm birth severity (livebirths) (categorical), n (%)</span>",
                   "<span style='font-size: 18px'>Preterm delivery severity (live & stillbirths) (categorical), n (%)</span>")
                   ) #%>% 
@@ -1482,9 +1482,9 @@ fetal_death_tab <- fetal_death %>% ## denominator is anyone with a birth outcome
       ")"), 
     
     "Fetal death at unknown GA" = paste0(
-      format(sum(INF_ABOR_SPN == 1, na.rm = TRUE), nsmall = 0, digits = 2),
+      format(sum(INF_FETAL_DTH_UNGA == 1, na.rm = TRUE), nsmall = 0, digits = 2),
       " (",
-      format(round(sum(INF_ABOR_SPN == 1, na.rm = TRUE)/sum(INF_FETAL_DTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      format(round(sum(INF_FETAL_DTH_UNGA == 1, na.rm = TRUE)/sum(INF_FETAL_DTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")"), 
     
     "Total fetal deaths" = paste0(

@@ -295,12 +295,6 @@ mnh09_long <- bind_rows(m09_INF1, m09_INF2, m09_INF3) %>%
   ## EXTRACT UNIQUE INFANTIDS FROM DELIVERY 
   filter(INFANTID %in% as.vector(delivered_infantids$INFANTID))
 
-## data check to see how many infants across sites 
-for (i in unique(mnh09_long$SITE)) {
-  df <- mnh09_long %>% filter(SITE == i)
-  print(paste0(i, " infants, n", "=", length(unique(df$INFANTID))))
-}
-
 # save data set
 write.csv(mnh09_long, paste0(path_to_save, "mnh09_long" ,".csv"), row.names=FALSE)
 
@@ -427,9 +421,9 @@ lowbirthweight <- mnh11_constructed %>%
   mutate(LBW1500_ANY = ifelse(BWEIGHT_ANY >= 0 & BWEIGHT_ANY < 1500, 1,
                               ifelse(BWEIGHT_ANY <= 0 | is.na(BWEIGHT_ANY), 55, 0))) %>% 
   mutate(LBW_CAT_PRISMA = ifelse(BWEIGHT_PRISMA >= 0 & BWEIGHT_PRISMA < 1500, 11, 
-                               ifelse(BWEIGHT_PRISMA >= 1500 & BWEIGHT_PRISMA < 2500, 12, 
-                                      ifelse(BWEIGHT_PRISMA >= 2500, 13, 
-                                             ifelse(BWEIGHT_PRISMA < 0 | M11_BW_EST_FAORRES > 150, 55, NA))))) %>% 
+                                 ifelse(BWEIGHT_PRISMA >= 1500 & BWEIGHT_PRISMA < 2500, 12, 
+                                        ifelse(BWEIGHT_PRISMA >= 2500, 13, 
+                                               ifelse(BWEIGHT_PRISMA < 0 | M11_BW_EST_FAORRES > 150, 55, NA))))) %>% 
   ## ANY LBW categorical variable: (any bw <1500g)=11, (any bw <2500g)=12, (any bw >= 2500g)
   mutate(LBW_CAT_ANY = ifelse(BWEIGHT_ANY >= 0 & BWEIGHT_ANY < 1500, 11,
                               ifelse( BWEIGHT_ANY >= 1500 & BWEIGHT_ANY < 2500, 12,
@@ -579,12 +573,13 @@ preterm_birth <- mnh01_constructed %>%
   mutate(PRETERMBIRTH_LT28 = ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 20 & GESTAGEBIRTH_BOE < 28, 1, 0)) %>% 
   
   # g. Preterm birth severity (categorical): term (>37 wks), Late preterm (34 to <37 wks), early preterm (32 to <34 wks), very preterm (28 to <32 wks), extermely preterm (<28 weeks) [varname: PRETERMBIRTH_CAT]
-  mutate(PRETERMBIRTH_CAT = ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >41, 10, 
-                                   ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 37 & GESTAGEBIRTH_BOE <41, 11,  
-                                          ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 34 & GESTAGEBIRTH_BOE < 37, 12, 
-                                                 ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 32 & GESTAGEBIRTH_BOE < 34, 13,
-                                                        ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 28 & GESTAGEBIRTH_BOE < 32, 14,
-                                                               ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 20 & GESTAGEBIRTH_BOE <28, 15, 55))))))) %>% 
+  mutate(PRETERMBIRTH_CAT = ifelse(LIVEBIRTH == 0, NA, 
+                                   ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >=41, 10, 
+                                          ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 37 & GESTAGEBIRTH_BOE <41, 11,  
+                                                 ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 34 & GESTAGEBIRTH_BOE < 37, 12, 
+                                                        ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 32 & GESTAGEBIRTH_BOE < 34, 13,
+                                                               ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 28 & GESTAGEBIRTH_BOE < 32, 14,
+                                                                      ifelse(LIVEBIRTH == 1 & GESTAGEBIRTH_BOE >= 20 & GESTAGEBIRTH_BOE <28, 15, 55)))))))) %>% 
   ## 2. Generate Outcomes for PRETERM DELIVERY (livebirths + stillbirths) ## 
   mutate(PRETERMDELIV_GT41 = ifelse(GESTAGEBIRTH_BOE >= 41, 1, 0)) %>% 
   
@@ -604,7 +599,7 @@ preterm_birth <- mnh01_constructed %>%
   mutate(PRETERMDELIV_LT28 = ifelse(GESTAGEBIRTH_BOE >= 20 & GESTAGEBIRTH_BOE < 28, 1, 0)) %>% 
   
   # g. Preterm birth severity (categorical): term (>37 wks), Late preterm (34 to <37 wks), early preterm (32 to <34 wks), very preterm (28 to <32 wks), extermely preterm (<28 weeks) [varname: PRETERMDELIV_CAT]
-  mutate(PRETERMDELIV_CAT = ifelse(GESTAGEBIRTH_BOE >41, 10, 
+  mutate(PRETERMDELIV_CAT = ifelse(GESTAGEBIRTH_BOE >=41, 10, 
                                    ifelse(GESTAGEBIRTH_BOE >= 37 & GESTAGEBIRTH_BOE <41, 11,  
                                           ifelse(GESTAGEBIRTH_BOE >= 34 & GESTAGEBIRTH_BOE < 37, 12, 
                                                  ifelse(GESTAGEBIRTH_BOE >= 32 & GESTAGEBIRTH_BOE < 34, 13,
@@ -613,6 +608,9 @@ preterm_birth <- mnh01_constructed %>%
   # only need a subset of vars
   select(SITE,INFANTID, MOMID, PREGID, M01_US_OHOSTDAT,GA_DIFF_DAYS, BIRTH_OUTCOME,LMP_GA_WKS,US_GA_WKS,
          GESTAGE_ENROLL_BOE, contains("PRETERMBIRTH_"),contains("PRETERMDELIV_"), LIVEBIRTH,GESTAGEBIRTH_BOE)
+
+
+test <- preterm_birth %>% filter(PRETERMBIRTH_CAT == 55) %>% select(SITE, MOMID, PREGID, INFANTID, PRETERMBIRTH_CAT, GESTAGEBIRTH_BOE, LIVEBIRTH)
 
 write.csv(preterm_birth, paste0(path_to_save, "preterm_birth" ,".csv"), row.names=FALSE)
 
@@ -960,7 +958,8 @@ fetal_death <- mnh09_long %>%
   mutate(INF_FETAL_DTH_DENOM = case_when(INF_ABOR_IND==1 ~ 0,
                                          TRUE~ 1)) 
 
-
+test <- fetal_death %>% filter(SITE == "Kenya") %>% 
+  select(MOMID,M04_PRG_DSDECOD, GESTAGE_FETAL_LOSS_WKS, STILLBIRTH_20WK,INF_ABOR_SPN, INF_FETAL_DTH_UNGA, INF_FETAL_DTH)
 
 
 # export data 
@@ -1065,6 +1064,12 @@ infant_outcomes <- mnh09_long %>%
 write.csv(infant_outcomes, paste0(path_to_save, "infant_outcomes" ,".csv"), row.names=FALSE)
 
 
+
+## data check to see how many infants across sites 
+for (i in unique(mnh09_long$SITE)) {
+  df <- mnh09_long %>% filter(SITE == i)
+  print(paste0(i, " infants, n", "=", length(unique(df$INFANTID))))
+}
 
 
 
