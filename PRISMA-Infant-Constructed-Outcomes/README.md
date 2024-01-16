@@ -8,7 +8,7 @@ accompanying report. This file is an ongoing document that will be
 updated as more outcomes are coded and generated. More information on
 the outcomes coded here can be found in the PRISMA protocol.
 
-#### :pushpin: Updated on 25 October 2023
+#### :pushpin: Updated on 14 January 2024
 
 #### :pushpin: Originally drafted by:
 
@@ -31,6 +31,9 @@ code.
 - Neonatal Mortality
 - Infant Mortality
 - Stillbirth
+- Fetal Loss
+- Perinatal Birth Asphyxia
+
 
 ## What data is required:
 
