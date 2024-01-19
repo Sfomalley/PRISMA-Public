@@ -1365,9 +1365,9 @@ stillbirth_tab <- stillbirth %>% ## denominator is anyone with a birth outcome r
       ")"), 
     
   "Total stillbirths reported" = paste0(
-      format(sum(BIRTH_OUTCOME == 0, na.rm = TRUE), nsmall = 0, digits = 2),
+      format(sum(STILLBIRTH_20WK == 1, na.rm = TRUE), nsmall = 0, digits = 2),
       " (",
-      format(round(sum(BIRTH_OUTCOME == 0, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
+      format(round(sum(STILLBIRTH_20WK == 1, na.rm = TRUE)/sum(STILLBIRTH_DENOM == 1, na.rm = TRUE)*100, 2), nsmall = 0, digits = 2),
       ")"), 
 
     

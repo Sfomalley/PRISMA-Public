@@ -215,7 +215,7 @@ mnh09_constructed <- mnh09 %>%
                                   M09_BIRTH_DSTERM_INF3 == 1 | M09_BIRTH_DSTERM_INF3 == 3 |
                                   M09_BIRTH_DSTERM_INF4 == 1 | M09_BIRTH_DSTERM_INF4 == 2, 1, 0)) %>% 
   # only want those who have had a birth outcome 
-  filter(BIRTH_OUTCOME == 1) %>% 
+  # filter(BIRTH_OUTCOME == 1) %>% 
   # calculate the number of days between DOB and estimated conception date
   mutate(GESTAGEBIRTH_BOE_DAYS = as.numeric(ymd(DOB) - ymd(EST_CONCEP_DATE)), 
          GESTAGEBIRTH_BOE = GESTAGEBIRTH_BOE_DAYS%/%7) %>% 
@@ -829,12 +829,12 @@ stillbirth <- mnh09_long %>%
   left_join(mnh01_constructed[c("SITE", "MOMID", "PREGID", "EDD_BOE", "GESTAGE_ENROLL_BOE")],  # "M01_US_GA_WKS_AGE_FTS1", "M01_US_GA_WKS_AGE_FTS2", "M01_US_GA_DAYS_AGE_FTS1", "M01_US_GA_DAYS_AGE_FTS2","M01_GA_LMP_WEEKS_SCORRES", "M01_GA_LMP_DAYS_SCORRES"
             by = c("SITE", "MOMID", "PREGID")) %>% 
   # merge in fetal loss information from mnh04 
-  left_join(mnh04_constructed_fetal_loss, by = c("SITE", "MOMID", "PREGID")) %>%  # dim = 1236
-  # remove induced abortions 
-  filter(M04_FETAL_LOSS_DSDECOD != 2) %>% 
+  full_join(mnh04_constructed_fetal_loss, by = c("SITE", "MOMID", "PREGID")) %>%  # dim = 1236
   # merge in mnh11 information to get birth outcome and signs of live
   full_join(mnh11_constructed[c("SITE","INFANTID", "MOMID", "PREGID", "M11_INF_DSTERM", "M11_BREATH_FAIL_CEOCCUR")], 
             by = c("SITE","INFANTID", "MOMID", "PREGID")) %>% # dim = 1246 (n=10 are weird ghana ids in mnh11)
+  # only keep fetal loss that are not induced abortions 
+  filter(M04_FETAL_LOSS_DSDECOD %in% c(1,3,77, NA)) %>% 
   # re-classify fetal loss code from mnh04 to be 0 for those without a fetal loss 
   mutate(M04_PRG_DSDECOD = ifelse(is.na(M04_PRG_DSDECOD), 0 , M04_PRG_DSDECOD)) %>% 
   ## add new var with a single ga at birth --use mnh09, if missing, use mnh04 
@@ -890,9 +890,9 @@ stillbirth <- mnh09_long %>%
   mutate(MISSING_SIGNS_OF_LIFE = ifelse(BIRTH_OUTCOME==0 & (M09_CRY_CEOCCUR == 77 | M09_CORD_PULS_CEOCCUR == 77 | 
                                                               M09_FHR_VSTAT==77 | M09_MACER_CEOCCUR == 77 | M11_BREATH_FAIL_CEOCCUR == 77), 1, 0))
 
+
 # export data 
 write.csv(stillbirth, paste0(path_to_save, "stillbirth" ,".csv"), row.names=FALSE)
-
 
 #*****************************************************************************
 #* 7. Fetal Death
