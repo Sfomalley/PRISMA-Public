@@ -1188,11 +1188,7 @@ sga_output <- tb_theme1(sga_tab) %>%
     label = html("<span style='font-size: 18px'>Size for Gestational Age (Cateogorical)<sup>a</sup>, n (%)</span>"),
     rows = 1:5
   )  %>%
-  row_group_order(groups = c("<span style='font-size: 18px'>Size for Gestational Age (Cateogorical)<sup>a</sup>, n (%)</span>")) %>% 
-  tab_footnote(
-    footnote = html("<span style='font-size: 18px'><sup>a</sup> R package used to generate percentiles only allows for gestational ages at birth between 33 and 42 weeks. All participants with gestational ages at birth outside this window are excluded from this table.</span>")
- )  
-
+  row_group_order(groups = c("<span style='font-size: 18px'>Size for Gestational Age (Cateogorical)<sup>a</sup>, n (%)</span>"))
 
 ```
 
