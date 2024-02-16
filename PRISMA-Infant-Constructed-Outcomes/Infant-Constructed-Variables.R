@@ -689,7 +689,7 @@ sga <- mnh09_long %>%
   # convert to numeric 
   mutate(across(c(GESTAGEBIRTH_BOE_DAYS, GESTAGEBIRTH_BOE, M09_INFANTS_FAORRES, M09_BIRTH_DSTERM, M09_SEX), as.numeric)) %>%
   ## only want live births 
-  filter(M09_BIRTH_DSTERM == 1 & GESTAGEBIRTH_BOE_DAYS >= 232 & GESTAGEBIRTH_BOE_DAYS <=300) %>% 
+  filter(M09_BIRTH_DSTERM == 1) %>% 
   ## merge with mnh11 
   left_join(mnh11_constructed, by = c("SITE", "MOMID", "PREGID", "INFANTID")) %>% 
   ## convert weight from grams to kg 
