@@ -6,10 +6,10 @@ This folder contains Stata code to generate analytical variables for possible Pe
 #### :pushpin: Originally drafted by:
 Stata code: Savannah F. O'Malley (savannah.omalley@gwu.edu)
 
-##Codes include:
+## Codes include:
 **`MNH25.do` uses MNH25 form to construct perinatal depression
 
-##Outcomes:
+## Outcomes:
 1. Screening for possible depression at 3 timepoints using a standard cutoff (11+)
 2. Screening for possible depression at 3 timepoints using site-specific cutoffs
 3. Depression summary score at 3 timepoints
